@@ -18,7 +18,7 @@ public class RTree<T> {
     return new Builder<>();
   }
 
-  public void insert(SpatialKey box, T data) {
+  public void insert(SpatialKey key, T data) {
 
   }
 

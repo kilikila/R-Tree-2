@@ -1,5 +1,5 @@
 package rtree;
 
-public class SpatialKey {
+public interface SpatialKey {
 
 }

@@ -38,11 +38,11 @@ public class RTreeTest extends DimensionalTest{
 
   private Map<SpatialKey, Object> generateSyntheticData() {
     return IntStream.range(0, DATA_SIZE)
-        .mapToObj(this::randomHyperBox)
-        .collect(Collectors.toMap(box -> box, box -> 0));
+        .mapToObj((seed) -> randomSpatialKey())
+        .collect(Collectors.toMap(key -> key, key -> 0));
   }
 
-  private SpatialKey randomHyperBox(int seed) {
-    return new SpatialKey();
+  private SpatialKey randomSpatialKey() {
+    return HyperBoxTest.createRandomBox(dimensions);
   }
 }
