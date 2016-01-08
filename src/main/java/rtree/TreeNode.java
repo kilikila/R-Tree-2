@@ -7,11 +7,15 @@ public class TreeNode extends Node {
 
   private final Set<Node> subNodes = new HashSet<>();
 
-  public TreeNode(HyperBox box) {
-    super(box);
+  public TreeNode(SpatialKey key) {
+    super(key);
   }
 
   public Set<Node> subNodes() {
     return subNodes;
+  }
+
+  public void addSubNode(Node subNode) {
+    subNodes.add(subNode);
   }
 }

@@ -1,4 +1,4 @@
-package rtree;
+package rtree.key;
 
 import org.junit.Test;
 

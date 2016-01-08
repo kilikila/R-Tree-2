@@ -1,4 +1,4 @@
-package rtree;
+package rtree.key;
 
 import com.google.common.base.Preconditions;
 

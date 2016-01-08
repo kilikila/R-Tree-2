@@ -1,6 +1,8 @@
-package rtree;
+package rtree.key;
 
 import org.junit.Test;
+import rtree.DimensionalTest;
+import rtree.SpatialKey;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -8,7 +10,7 @@ import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class HyperBoxTest extends DimensionalTest{
+public class HyperBoxTest extends DimensionalTest {
 
   public HyperBoxTest(Integer dimensions) {
     super(dimensions);
@@ -16,7 +18,7 @@ public class HyperBoxTest extends DimensionalTest{
 
   @Test
   public void testNew() {
-    HyperBox randomBox = randomBox(cube(10, dimensions));
+    SpatialKey randomBox = randomBox(cube(10, dimensions));
     assertThat(randomBox.dimensions()).isEqualTo(dimensions);
   }
 

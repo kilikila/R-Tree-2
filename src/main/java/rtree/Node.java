@@ -1,13 +1,13 @@
 package rtree;
 
 public abstract class Node {
-  private final HyperBox box;
+  private final SpatialKey key;
 
-  public Node(HyperBox box) {
-    this.box = box;
+  public Node(SpatialKey key) {
+    this.key = key;
   }
 
-  public HyperBox hyperBox() {
-    return box;
+  public SpatialKey spatialKey() {
+    return key;
   }
 }

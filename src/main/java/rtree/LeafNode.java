@@ -4,8 +4,8 @@ public class LeafNode<T> extends Node {
 
   private final T data;
 
-  public LeafNode(HyperBox box, T data) {
-    super(box);
+  public LeafNode(SpatialKey key, T data) {
+    super(key);
     this.data = data;
   }
 

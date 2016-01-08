@@ -2,6 +2,8 @@ package rtree;
 
 import org.junit.Before;
 import org.junit.Test;
+import rtree.key.HyperBox;
+import rtree.key.HyperBoxTest;
 
 import java.util.Map;
 import java.util.Set;
@@ -14,7 +16,7 @@ public class RTreeTest extends DimensionalTest{
 
   private static int DATA_SIZE = 1000;
 
-  private RTree<HyperBox> tree;
+  private RTree<HyperBox, HyperBox> tree;
 
   private HyperBox boundingBox = HyperBoxTest.cube(20, dimensions);
 
@@ -24,7 +26,11 @@ public class RTreeTest extends DimensionalTest{
 
   @Before
   public void setUp() {
-    tree = RTree.<HyperBox>builder().dimensions(dimensions).create();
+    tree = RTree.builder()
+        .dimensions(dimensions)
+        .spatialKey(HyperBox.class)
+        .dataType(HyperBox.class)
+        .create();
     Map<HyperBox, HyperBox> data = generateSyntheticData();
     data.forEach(tree::insert);
   }
