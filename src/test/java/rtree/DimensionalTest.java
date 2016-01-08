@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @RunWith(Parameterized.class)
-public class DimensionalTest {
+public abstract class DimensionalTest {
 
   private static int MAX_DIMENSION = 5;
 

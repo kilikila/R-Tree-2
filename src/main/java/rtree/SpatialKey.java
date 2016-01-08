@@ -1,9 +1,10 @@
 package rtree;
 
-/**
- * Created by Юыху on 08.01.2016.
- */
 public interface SpatialKey {
 
   int dimensions();
+
+  boolean intersects(SpatialKey spatialKey);
+
+  SpatialKey union(SpatialKey key);
 }

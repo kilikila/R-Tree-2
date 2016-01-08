@@ -17,6 +17,16 @@ public class HyperBox implements SpatialKey {
     return bounds.size();
   }
 
+  @Override
+  public boolean intersects(SpatialKey spatialKey) {
+    return false;
+  }
+
+  @Override
+  public SpatialKey union(SpatialKey key) {
+    return null;
+  }
+
   public BoxBound bound(int dim) {
     return bounds.get(dim);
   }

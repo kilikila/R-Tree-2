@@ -1,7 +1,7 @@
 package rtree;
 
 public abstract class Node {
-  private final SpatialKey key;
+  private SpatialKey key;
 
   public Node(SpatialKey key) {
     this.key = key;
@@ -9,5 +9,9 @@ public abstract class Node {
 
   public SpatialKey spatialKey() {
     return key;
+  }
+
+  public void spatialKey(SpatialKey key) {
+    this.key = key;
   }
 }
