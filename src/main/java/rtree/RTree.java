@@ -9,6 +9,8 @@ public class RTree<T> {
 
   private final int dimensions;
 
+  private TreeNode rootNode;
+
   public RTree(int dimensions) {
     this.dimensions = dimensions;
   }
@@ -18,11 +20,10 @@ public class RTree<T> {
   }
 
   public void insert(HyperBox key, T data) {
-
   }
 
-  public Set<T> intersection(HyperBox queryKey) {
-    return new HashSet<>();
+  public Set<T> search(HyperBox queryKey) {
+    return null;
   }
 
   public static <P> Builder<P> builder() {

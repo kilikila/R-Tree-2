@@ -36,7 +36,7 @@ public class RTreeTest extends DimensionalTest{
 
   @Test
   public void testIntersection() {
-    Set<HyperBox> intersection = tree.intersection(boundingBox);
+    Set<HyperBox> intersection = tree.search(boundingBox);
     assertThat(intersection).hasSize(DATA_SIZE);
   }
 
