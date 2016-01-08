@@ -4,6 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -13,7 +14,9 @@ public class RTreeTest extends DimensionalTest{
 
   private static int DATA_SIZE = 1000;
 
-  private RTree<Object> tree;
+  private RTree<HyperBox> tree;
+
+  private HyperBox boundingBox = HyperBoxTest.cube(20, dimensions);
 
   public RTreeTest(final Integer dimensions) {
     super(dimensions);
@@ -21,8 +24,8 @@ public class RTreeTest extends DimensionalTest{
 
   @Before
   public void setUp() {
-    tree = RTree.builder().dimensions(dimensions).create();
-    Map<SpatialKey, Object> data = generateSyntheticData();
+    tree = RTree.<HyperBox>builder().dimensions(dimensions).create();
+    Map<HyperBox, HyperBox> data = generateSyntheticData();
     data.forEach(tree::insert);
   }
 
@@ -33,16 +36,17 @@ public class RTreeTest extends DimensionalTest{
 
   @Test
   public void testIntersection() {
-
+    Set<HyperBox> intersection = tree.intersection(boundingBox);
+    assertThat(intersection).hasSize(DATA_SIZE);
   }
 
-  private Map<SpatialKey, Object> generateSyntheticData() {
+  private Map<HyperBox, HyperBox> generateSyntheticData() {
     return IntStream.range(0, DATA_SIZE)
         .mapToObj((seed) -> randomSpatialKey())
-        .collect(Collectors.toMap(key -> key, key -> 0));
+        .collect(Collectors.toMap(key -> key, key -> key));
   }
 
-  private SpatialKey randomSpatialKey() {
-    return HyperBoxTest.createRandomBox(dimensions);
+  private HyperBox randomSpatialKey() {
+    return HyperBoxTest.randomBox(boundingBox);
   }
 }

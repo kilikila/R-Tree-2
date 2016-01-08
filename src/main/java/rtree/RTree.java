@@ -2,6 +2,9 @@ package rtree;
 
 import com.google.common.base.Preconditions;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class RTree<T> {
 
   private final int dimensions;
@@ -14,12 +17,16 @@ public class RTree<T> {
     return dimensions;
   }
 
-  public static <P> Builder<P> builder() {
-    return new Builder<>();
+  public void insert(HyperBox key, T data) {
+
   }
 
-  public void insert(SpatialKey key, T data) {
+  public Set<T> intersection(HyperBox queryKey) {
+    return new HashSet<>();
+  }
 
+  public static <P> Builder<P> builder() {
+    return new Builder<>();
   }
 
   public static class Builder<T> {

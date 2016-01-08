@@ -29,14 +29,4 @@
 
 rtree.iml
 
-target/classes/rtree/HyperBox.class
-
-target/classes/rtree/RTree$Builder.class
-
-target/classes/rtree/RTree.class
-
-target/test-classes/rtree/DimensionalTest.class
-
-target/test-classes/rtree/HyperBoxTest.class
-
-target/test-classes/rtree/RTreeTest.class
+*.class
