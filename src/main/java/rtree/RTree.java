@@ -3,6 +3,7 @@ package rtree;
 import com.google.common.base.Preconditions;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -11,6 +12,8 @@ public class RTree<T> {
   private final int dimensions;
 
   private NodeSplitter splitter;
+
+  private SubNodeSelector nodeSelector;
 
   private TreeNode rootNode = null;
 
@@ -29,7 +32,7 @@ public class RTree<T> {
   }
 
   public Set<T> intersection(final SpatialKey queryKey) {
-    return new TreeSearcher((node) -> queryKey.intersects(node.spatialKey())).find();
+    return new TreeSearcher((node) -> queryKey.intersects(node.spatialKey())).search();
   }
 
   public void clear() {
@@ -91,30 +94,49 @@ public class RTree<T> {
         rootNode = new TreeNode(leafNode.spatialKey());
         rootNode.addSubNode(leafNode);
       } else {
-        insertToSubNode(rootNode);
+        Optional<Set<TreeNode>> split = insertToSubNode(rootNode);
+        split.ifPresent(this::makeNewRoot);
       }
     }
 
-    private void insertToSubNode(TreeNode node) {
-      if (!subNodesAreLeaves(node)) {
-        TreeNode subNode = chooseSubNode(node);
-        insertToSubNode(subNode);
-      } else {
+    private Optional<Set<TreeNode>> insertToSubNode(TreeNode node) {
+      if (subNodesAreLeaves(node)) {
         node.addSubNode(leafNode);
+      } else {
+        TreeNode subNode = nodeSelector.chooseSubNode(node);
+        Optional<Set<TreeNode>> split = insertToSubNode(subNode);
+        split.ifPresent(nodes -> replaceWithNodes(node, subNode, nodes));
       }
-      updateSpatialKey(node);
+      return splitIfNecessaryAndUpdateKey(node);
     }
 
-    private void updateSpatialKey(TreeNode node) {
+    private void replaceWithNodes(TreeNode node, TreeNode subNode, Set<TreeNode> newNodes) {
+      node.subNodes().remove(subNode);
+      newNodes.forEach(node::addSubNode);
+    }
+
+    private Optional<Set<TreeNode>> splitIfNecessaryAndUpdateKey(TreeNode node) {
+      Optional<Set<TreeNode>> split = splitter.split(node);
+      if (split.isPresent()) {
+        split.get().forEach(this::update);
+      } else {
+        update(node);
+      }
+      return split;
+    }
+
+    private void makeNewRoot(Set<TreeNode> nodes) {
+      rootNode = new TreeNode(leafNode.spatialKey());
+      nodes.forEach(rootNode::addSubNode);
+      update(rootNode);
+    }
+
+    private void update(TreeNode node) {
       SpatialKey unionKey = node.subNodes()
           .stream()
           .map(Node::spatialKey)
           .collect(leafNode::spatialKey, SpatialKey::union, SpatialKey::union);
       node.spatialKey(unionKey);
-    }
-
-    private TreeNode chooseSubNode(TreeNode node) {
-      return null;
     }
 
     private boolean subNodesAreLeaves(TreeNode node) {
@@ -133,7 +155,7 @@ public class RTree<T> {
       this.condition = condition;
     }
 
-    public Set<T> find() {
+    public Set<T> search() {
       if (!isEmpty()) {
         searchSubNodes(rootNode);
       }
@@ -151,5 +173,12 @@ public class RTree<T> {
       }
     }
 
+  }
+
+  private class SubNodeSelector {
+
+    public TreeNode chooseSubNode(TreeNode node) {
+      return null;
+    }
   }
 }

@@ -4,10 +4,7 @@ import org.assertj.core.api.Condition;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -61,7 +58,7 @@ public class RTreeTest extends DimensionalTest{
     return SpatialKeyTest.randomBox(boundingBox);
   }
 
-  private HashSet<Node> trivialSplit(Node node) {
-    return new HashSet<>(Arrays.asList(node));
+  private Optional<Set<TreeNode>> trivialSplit(Node node) {
+    return Optional.empty();
   }
 }

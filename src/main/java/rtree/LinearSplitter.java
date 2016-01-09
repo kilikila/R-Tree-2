@@ -1,15 +1,21 @@
 package rtree;
 
+import java.util.Optional;
 import java.util.Set;
 
 public class LinearSplitter implements NodeSplitter {
 
-  public LinearSplitter(int minSubNodes, int maxSubNodes) {
+  private final int minSubNodes;
 
+  private final int maxSubNodes;
+
+  public LinearSplitter(int minSubNodes, int maxSubNodes) {
+    this.minSubNodes = minSubNodes;
+    this.maxSubNodes = maxSubNodes;
   }
 
   @Override
-  public Set<Node> split(Node node) {
+  public Optional<Set<TreeNode>> split(TreeNode node) {
     return null;
   }
 }
