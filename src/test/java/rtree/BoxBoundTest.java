@@ -1,7 +1,6 @@
 package rtree;
 
 import org.junit.Test;
-import rtree.SpatialKey;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

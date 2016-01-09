@@ -1,8 +1,6 @@
 package rtree;
 
 import org.junit.Test;
-import rtree.DimensionalTest;
-import rtree.SpatialKey;
 
 import java.util.List;
 import java.util.stream.Collectors;
