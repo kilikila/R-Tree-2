@@ -10,18 +10,12 @@ public class RTree<T> {
 
   private final int dimensions;
 
-  private final int minSubNodes;
-
-  private final int maxSubNodes;
-
   private NodeSplitter splitter;
 
   private TreeNode rootNode = null;
 
-  public RTree(int dimensions, NodeSplitter splitter, int minSubNodes, int maxSubNodes) {
+  public RTree(int dimensions, NodeSplitter splitter) {
     this.dimensions = dimensions;
-    this.minSubNodes = minSubNodes;
-    this.maxSubNodes = maxSubNodes;
     this.splitter = splitter;
   }
 
@@ -31,7 +25,7 @@ public class RTree<T> {
 
   public void insert(final SpatialKey key, final T data) {
     checkKeyDimensions(key);
-    new NodeInsertionPerformer(new LeafNode<>(key, data)).insert();
+    new InsertionPerformer(new LeafNode<>(key, data)).insert();
   }
 
   public Set<T> intersection(final SpatialKey queryKey) {
@@ -58,15 +52,9 @@ public class RTree<T> {
 
   public static class Builder<T> {
 
-    private static final double OPTIMAL_MIN_MAX_RELATION = 0.4;
-
     private int dimensions = 2;
 
-    private NodeSplitter splitter;
-
-    private int minSubNodes = 4;
-
-    private int maxSubNodes = 10;
+    private NodeSplitter splitter = new LinearSplitter(4, 10);
 
     public Builder<T> dimensions(int dimensions) {
       Preconditions.checkArgument(dimensions > 0, "Dimensions must be positive, you set %s", dimensions);
@@ -84,50 +72,37 @@ public class RTree<T> {
       return this;
     }
 
-    public Builder<T> minSubNodes(int minSubNodes) {
-      this.minSubNodes = minSubNodes;
-      if (minSubNodes >= maxSubNodes) {
-        maxSubNodes = (int) (minSubNodes / OPTIMAL_MIN_MAX_RELATION);
-      }
-      return this;
-    }
-
-    public Builder<T> maxSubNodes(int maxSubNodes) {
-      this.maxSubNodes = maxSubNodes;
-      if (minSubNodes >= maxSubNodes) {
-        minSubNodes = (int) (maxSubNodes * OPTIMAL_MIN_MAX_RELATION);
-      }
-      return this;
-    }
     public RTree<T> create() {
-      return new RTree<>(dimensions, splitter, minSubNodes, maxSubNodes);
+      return new RTree<>(dimensions, splitter);
     }
 
   }
 
-  private class NodeInsertionPerformer {
+  private class InsertionPerformer {
 
     private final LeafNode<T> leafNode;
 
-    public NodeInsertionPerformer(LeafNode<T> leafNode) {
+    public InsertionPerformer(LeafNode<T> leafNode) {
       this.leafNode = leafNode;
-      if (isEmpty()) {
-        rootNode = new TreeNode(leafNode.spatialKey());
-      }
     }
 
     private void insert() {
-      insertToSubNode(rootNode);
+      if (isEmpty()) {
+        rootNode = new TreeNode(leafNode.spatialKey());
+        rootNode.addSubNode(leafNode);
+      } else {
+        insertToSubNode(rootNode);
+      }
     }
 
     private void insertToSubNode(TreeNode node) {
-      if (hasSubTree(node)) {
+      if (!subNodesAreLeaves(node)) {
         TreeNode subNode = chooseSubNode(node);
         insertToSubNode(subNode);
-        updateSpatialKey(node);
       } else {
         node.addSubNode(leafNode);
       }
+      updateSpatialKey(node);
     }
 
     private void updateSpatialKey(TreeNode node) {
@@ -140,16 +115,6 @@ public class RTree<T> {
 
     private TreeNode chooseSubNode(TreeNode node) {
       return null;
-    }
-
-    private boolean hasSubTree(TreeNode node) {
-      if (node.subNodes().isEmpty()) {
-        return false;
-      } else if (subNodesAreLeaves(node)){
-        return false;
-      } else {
-        return true;
-      }
     }
 
     private boolean subNodesAreLeaves(TreeNode node) {

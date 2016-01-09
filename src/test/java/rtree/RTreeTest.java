@@ -1,8 +1,11 @@
 package rtree;
 
+import org.assertj.core.api.Condition;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -14,7 +17,7 @@ public class RTreeTest extends DimensionalTest{
 
   private static int DATA_SIZE = 1000;
 
-  private RTree<SpatialKey, SpatialKey> tree;
+  private RTree<SpatialKey> tree;
 
   private SpatialKey boundingBox = SpatialKeyTest.cube(20, dimensions);
 
@@ -26,7 +29,7 @@ public class RTreeTest extends DimensionalTest{
   public void setUp() {
     tree = RTree.builder()
         .dimensions(dimensions)
-        .spatialKey(SpatialKey.class)
+        .nodeSplitter(this::trivialSplit)
         .dataType(SpatialKey.class)
         .create();
     Map<SpatialKey, SpatialKey> data = generateSyntheticData();
@@ -40,8 +43,12 @@ public class RTreeTest extends DimensionalTest{
 
   @Test
   public void testIntersection() {
-    Set<SpatialKey> intersection = tree.intersection(boundingBox);
-    assertThat(intersection).hasSize(DATA_SIZE);
+    Set<SpatialKey> wholeDataSet = tree.intersection(boundingBox);
+    assertThat(wholeDataSet).hasSize(DATA_SIZE);
+    SpatialKey queryKey = randomSpatialKey();
+    Set<SpatialKey> intersection = tree.intersection(queryKey);
+    assertThat(wholeDataSet).containsAll(intersection);
+    assertThat(intersection).are(new Condition<>(queryKey::intersects, "Key intersects %s", queryKey));
   }
 
   private Map<SpatialKey, SpatialKey> generateSyntheticData() {
@@ -52,5 +59,9 @@ public class RTreeTest extends DimensionalTest{
 
   private SpatialKey randomSpatialKey() {
     return SpatialKeyTest.randomBox(boundingBox);
+  }
+
+  private HashSet<Node> trivialSplit(Node node) {
+    return new HashSet<>(Arrays.asList(node));
   }
 }
