@@ -82,7 +82,7 @@ public class RTreeTest extends DimensionalTest{
   }
 
   private Set<Set<Node>> divideSubNodes(TreeNode node) {
-    List<Node> nodes = node.subNodes().stream().sorted(this::compareKey).collect(Collectors.toList());
+    List<Node> nodes = node.subNodes().stream().sorted(Comparator.comparingDouble(this::boundMin)).collect(Collectors.toList());
     int halfSize = nodes.size() / 2;
     Set<Set<Node>> division = new HashSet<>(2);
     Set<Node> nodes1 = nodes.subList(0, halfSize).stream().collect(Collectors.toSet());
@@ -92,7 +92,7 @@ public class RTreeTest extends DimensionalTest{
     return division;
   }
 
-  private int compareKey(Node node1, Node node2) {
-    return 0;
+  private double boundMin(Node node) {
+    return node.spatialKey().bound(0).min();
   }
 }
