@@ -45,7 +45,8 @@ public class RTreeTest extends DimensionalTest{
     SpatialKey queryKey = randomSpatialKey();
     Set<SpatialKey> intersection = tree.intersection(queryKey);
     assertThat(wholeDataSet).containsAll(intersection);
-    assertThat(intersection).are(new Condition<>(queryKey::intersects, "Key intersects %s", queryKey));
+    assertThat(intersection).are(new Condition<>(queryKey::intersects,
+        "Intersection check for key %s", queryKey));
   }
 
   private Map<SpatialKey, SpatialKey> generateSyntheticData() {
@@ -58,7 +59,40 @@ public class RTreeTest extends DimensionalTest{
     return SpatialKeyTest.randomBox(boundingBox);
   }
 
-  private Optional<Set<TreeNode>> trivialSplit(Node node) {
-    return Optional.empty();
+  private Optional<Set<TreeNode>> trivialSplit(TreeNode node) {
+    if (node.subNodes().size() > 5) {
+      Set<TreeNode> split = divideSubNodes(node)
+          .stream()
+          .map(this::treeNode)
+          .collect(Collectors.toSet());
+      return Optional.of(split);
+    } else {
+      return Optional.empty();
+    }
+  }
+
+  private TreeNode treeNode(Set<Node> division) {
+    TreeNode treeNode = new TreeNode(getKey(division));
+    division.forEach(treeNode::addSubNode);
+    return treeNode;
+  }
+
+  private SpatialKey getKey(Set<Node> division) {
+    return division.iterator().next().spatialKey();
+  }
+
+  private Set<Set<Node>> divideSubNodes(TreeNode node) {
+    List<Node> nodes = node.subNodes().stream().sorted(this::compareKey).collect(Collectors.toList());
+    int halfSize = nodes.size() / 2;
+    Set<Set<Node>> division = new HashSet<>(2);
+    Set<Node> nodes1 = nodes.subList(0, halfSize).stream().collect(Collectors.toSet());
+    Set<Node> nodes2 = nodes.subList(halfSize, nodes.size()).stream().collect(Collectors.toSet());
+    division.add(nodes1);
+    division.add(nodes2);
+    return division;
+  }
+
+  private int compareKey(Node node1, Node node2) {
+    return 0;
   }
 }

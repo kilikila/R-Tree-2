@@ -2,6 +2,7 @@ package rtree;
 
 import com.google.common.base.Preconditions;
 
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -12,8 +13,6 @@ public class RTree<T> {
   private final int dimensions;
 
   private NodeSplitter splitter;
-
-  private SubNodeSelector nodeSelector;
 
   private TreeNode rootNode = null;
 
@@ -103,7 +102,7 @@ public class RTree<T> {
       if (subNodesAreLeaves(node)) {
         node.addSubNode(leafNode);
       } else {
-        TreeNode subNode = nodeSelector.chooseSubNode(node);
+        TreeNode subNode = chooseSubNode(node);
         Optional<Set<TreeNode>> split = insertToSubNode(subNode);
         split.ifPresent(nodes -> replaceWithNodes(node, subNode, nodes));
       }
@@ -137,6 +136,24 @@ public class RTree<T> {
           .map(Node::spatialKey)
           .collect(leafNode::spatialKey, SpatialKey::union, SpatialKey::union);
       node.spatialKey(unionKey);
+    }
+
+    public TreeNode chooseSubNode(TreeNode node) {
+      Node chosenSubNode = node.subNodes()
+          .stream()
+          .min(Comparator.comparingDouble(this::volumeIncrease))
+          .orElseThrow(IllegalStateException::new);
+      if (chosenSubNode instanceof TreeNode) {
+        return (TreeNode) chosenSubNode;
+      } else {
+        throw new IllegalStateException("Incorrect node type");
+      }
+    }
+
+    private double volumeIncrease(Node node) {
+      double volume = node.spatialKey().volume();
+      double volumeWithLeaf = node.spatialKey().union(leafNode.spatialKey()).volume();
+      return volumeWithLeaf - volume;
     }
 
     private boolean subNodesAreLeaves(TreeNode node) {
@@ -173,12 +190,5 @@ public class RTree<T> {
       }
     }
 
-  }
-
-  private class SubNodeSelector {
-
-    public TreeNode chooseSubNode(TreeNode node) {
-      return null;
-    }
   }
 }

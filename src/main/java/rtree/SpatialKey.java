@@ -3,6 +3,7 @@ package rtree;
 import com.google.common.base.Preconditions;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -41,6 +42,11 @@ public class SpatialKey {
     return new SpatialKey(bounds);
   }
 
+  public double volume() {
+    Optional<Double> volume = bounds.stream().map(Bound::length).collect(Collectors.reducing((l1, l2) -> l1 * l2));
+    return volume.get();
+  }
+
   public static class Bound {
 
     private final double min;
@@ -68,6 +74,10 @@ public class SpatialKey {
 
     public Bound union(Bound other) {
       return new Bound(Math.min(min, other.min), Math.max(max, other.max));
+    }
+
+    public double length() {
+      return max - min;
     }
   }
   public static Builder create(int dimensions) {
