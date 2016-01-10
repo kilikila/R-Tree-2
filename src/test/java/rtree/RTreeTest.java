@@ -26,7 +26,7 @@ public class RTreeTest extends DimensionalTest{
   public void setUp() {
     tree = RTree.builder()
         .dimensions(dimensions)
-        .nodeSplitter(this::trivialSplit)
+        .nodeSplitter(new LongestBoundSplitter(4, 10))
         .dataType(SpatialKey.class)
         .create();
     Map<SpatialKey, SpatialKey> data = generateSyntheticData();
@@ -59,40 +59,4 @@ public class RTreeTest extends DimensionalTest{
     return SpatialKeyTest.randomBox(boundingBox);
   }
 
-  private Optional<Set<TreeNode>> trivialSplit(TreeNode node) {
-    if (node.subNodes().size() > 5) {
-      Set<TreeNode> split = divideSubNodes(node)
-          .stream()
-          .map(this::treeNode)
-          .collect(Collectors.toSet());
-      return Optional.of(split);
-    } else {
-      return Optional.empty();
-    }
-  }
-
-  private TreeNode treeNode(Set<Node> division) {
-    TreeNode treeNode = new TreeNode(getKey(division));
-    division.forEach(treeNode::addSubNode);
-    return treeNode;
-  }
-
-  private SpatialKey getKey(Set<Node> division) {
-    return division.iterator().next().spatialKey();
-  }
-
-  private Set<Set<Node>> divideSubNodes(TreeNode node) {
-    List<Node> nodes = node.subNodes().stream().sorted(Comparator.comparingDouble(this::boundMin)).collect(Collectors.toList());
-    int halfSize = nodes.size() / 2;
-    Set<Set<Node>> division = new HashSet<>(2);
-    Set<Node> nodes1 = nodes.subList(0, halfSize).stream().collect(Collectors.toSet());
-    Set<Node> nodes2 = nodes.subList(halfSize, nodes.size()).stream().collect(Collectors.toSet());
-    division.add(nodes1);
-    division.add(nodes2);
-    return division;
-  }
-
-  private double boundMin(Node node) {
-    return node.spatialKey().bound(0).min();
-  }
 }

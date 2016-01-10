@@ -56,7 +56,7 @@ public class RTree<T> {
 
     private int dimensions = 2;
 
-    private NodeSplitter splitter = new LinearSplitter(4, 10);
+    private NodeSplitter splitter = new LongestBoundSplitter(4, 10);
 
     public Builder<T> dimensions(int dimensions) {
       Preconditions.checkArgument(dimensions > 0, "Dimensions must be positive, you set %s", dimensions);
