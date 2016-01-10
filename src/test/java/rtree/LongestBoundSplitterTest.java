@@ -1,6 +1,6 @@
 package rtree;
 
-public class LongestBoundSplitterTest extends MinMaxSplitterTest {
+public class LongestBoundSplitterTest extends OverflowSplitterTest {
 
   public LongestBoundSplitterTest(Integer dimensions) {
     super(dimensions);

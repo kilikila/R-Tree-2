@@ -8,13 +8,13 @@ import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public abstract class MinMaxSplitterTest extends SplitterTest {
+public abstract class OverflowSplitterTest extends SplitterTest {
 
   protected final int minSubNodes = 4;
 
   protected final int maxSubNodes = 10;
 
-  public MinMaxSplitterTest(Integer dimensions) {
+  public OverflowSplitterTest(Integer dimensions) {
     super(dimensions);
   }
 
@@ -25,7 +25,7 @@ public abstract class MinMaxSplitterTest extends SplitterTest {
   }
 
   @Override
-  protected abstract MinMaxSplitter supplySplitter();
+  protected abstract OverflowSplitter supplySplitter();
 
   @Override
   protected void addSubNodesEnoughToSplit() {

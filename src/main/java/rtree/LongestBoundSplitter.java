@@ -3,16 +3,17 @@ package rtree;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class LongestBoundSplitter extends MinMaxSplitter {
+public class LongestBoundSplitter extends OverflowSplitter {
 
   public LongestBoundSplitter(int minSubNodes, int maxSubNodes) {
     super(minSubNodes, maxSubNodes);
   }
 
-  protected Collection<Collection<Node>> divideSubNodes(TreeNode node) {
+  protected Set<Collection<Node>> divideSubNodes(TreeNode node) {
     int dimension = getLongestBoundDimension(node);
     List<Node> nodes = node.subNodes()
         .stream()

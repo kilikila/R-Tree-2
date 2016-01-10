@@ -5,13 +5,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public abstract class MinMaxSplitter implements NodeSplitter {
+public abstract class OverflowSplitter implements NodeSplitter {
 
   protected final int minSubNodes;
 
   protected final int maxSubNodes;
 
-  public MinMaxSplitter(int minSubNodes, int maxSubNodes) {
+  public OverflowSplitter(int minSubNodes, int maxSubNodes) {
     this.minSubNodes = minSubNodes;
     this.maxSubNodes = maxSubNodes;
   }
@@ -32,7 +32,7 @@ public abstract class MinMaxSplitter implements NodeSplitter {
     return node.subNodes().size() > maxSubNodes;
   }
 
-  protected abstract Collection<Collection<Node>> divideSubNodes(TreeNode node);
+  protected abstract Set<Collection<Node>> divideSubNodes(TreeNode node);
 
   private TreeNode treeNode(Collection<Node> division) {
     TreeNode treeNode = new TreeNode(getKey(division));
