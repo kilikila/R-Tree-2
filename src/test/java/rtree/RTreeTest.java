@@ -5,12 +5,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class RTreeTest extends DimensionalTest{
+public class RTreeTest extends DimensionalTest {
 
   private static int DATA_SIZE = 1000;
 
@@ -29,7 +30,7 @@ public class RTreeTest extends DimensionalTest{
         .nodeSplitter(new LongestBoundSplitter(4, 10))
         .dataType(SpatialKey.class)
         .create();
-    Map<SpatialKey, SpatialKey> data = generateSyntheticData();
+    Map<SpatialKey, SpatialKey> data = generateSyntheticData(key -> key, DATA_SIZE, boundingBox);
     data.forEach(tree::insert);
   }
 
@@ -42,21 +43,20 @@ public class RTreeTest extends DimensionalTest{
   public void testIntersection() {
     Set<SpatialKey> wholeDataSet = tree.intersection(boundingBox);
     assertThat(wholeDataSet).hasSize(DATA_SIZE);
-    SpatialKey queryKey = randomSpatialKey();
+    SpatialKey queryKey = SpatialKeyTest.randomBox(boundingBox);
     Set<SpatialKey> intersection = tree.intersection(queryKey);
     assertThat(wholeDataSet).containsAll(intersection);
     assertThat(intersection).are(new Condition<>(queryKey::intersects,
         "Intersection check for key %s", queryKey));
   }
 
-  private Map<SpatialKey, SpatialKey> generateSyntheticData() {
-    return IntStream.range(0, DATA_SIZE)
-        .mapToObj(i -> randomSpatialKey())
-        .collect(Collectors.toMap(key -> key, key -> key));
-  }
-
-  private SpatialKey randomSpatialKey() {
-    return SpatialKeyTest.randomBox(boundingBox);
+  static <T> Map<SpatialKey, T> generateSyntheticData(
+      Function<SpatialKey, T> dataExtractor,
+      int dataSize,
+      SpatialKey boundingBox) {
+    return IntStream.range(0, dataSize)
+        .mapToObj(i -> SpatialKeyTest.randomBox(boundingBox))
+        .collect(Collectors.toMap(key -> key, dataExtractor));
   }
 
 }

@@ -28,14 +28,14 @@ public class SpatialKey {
   }
 
   public boolean intersects(SpatialKey other) {
-    checkDimensions(other);
+    checkDimensionsMatch(other);
     for (int i = 0; i < dimensions(); i++)
       if (bound(i).intersects(other.bound(i))) return true;
     return false;
   }
 
   public SpatialKey union(SpatialKey other) {
-    checkDimensions(other);
+    checkDimensionsMatch(other);
     List<Bound> bounds = IntStream.range(0, dimensions())
         .mapToObj(i -> bound(i).union(other.bound(i)))
         .collect(Collectors.toList());
@@ -80,11 +80,11 @@ public class SpatialKey {
       return max - min;
     }
   }
-  public static Builder create(int dimensions) {
+  public static Builder builder(int dimensions) {
     return new Builder(dimensions);
   }
 
-  private static class Builder {
+  public static class Builder {
 
     private final SpatialKey key;
 
@@ -95,9 +95,19 @@ public class SpatialKey {
       key = new SpatialKey(bounds);
     }
 
-    public void setBound(int dimension, double min, double max) {
+    public Builder setBound(int dimension, double min, double max) {
+      checkDimensionSupported(dimension);
       checkMinMax(min, max);
       key.bound(dimension, min, max);
+      return this;
+    }
+
+    private void checkDimensionSupported(int dimension) {
+      Preconditions.checkArgument(dimension < key.dimensions(), "Incorrect dimension: %s", dimension);
+    }
+
+    public SpatialKey create() {
+      return key;
     }
 
   }
@@ -106,7 +116,7 @@ public class SpatialKey {
     Preconditions.checkArgument(min <= max, "Min must be less than or equal to max");
   }
 
-  private void checkDimensions(SpatialKey other) {
+  private void checkDimensionsMatch(SpatialKey other) {
     Preconditions.checkArgument(dimensions() == other.dimensions(),
         "Spatial keys have different number of dimensions");
   }
