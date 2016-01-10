@@ -1,10 +1,10 @@
 package rtree;
 
+import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class LongestBoundSplitter extends MinMaxSplitter {
 
@@ -12,25 +12,33 @@ public class LongestBoundSplitter extends MinMaxSplitter {
     super(minSubNodes, maxSubNodes);
   }
 
-  protected Set<Set<Node>> divideSubNodes(TreeNode node) {
+  protected Collection<Collection<Node>> divideSubNodes(TreeNode node) {
+    int dimension = getLongestBoundDimension(node);
     List<Node> nodes = node.subNodes()
         .stream()
-        .sorted(Comparator.comparingDouble(this::boundMin))
+        .sorted(Comparator.comparingDouble((subNode) -> boundMin(subNode, dimension)))
         .collect(Collectors.toList());
-    int halfSize = nodes.size() / 2;
-    Set<Set<Node>> division = new HashSet<>(2);
-    Set<Node> nodes1 = nodes.subList(0, halfSize)
-        .stream()
+    double nodesInDivision = 1.0 * nodes.size() / minSubNodes;
+    return IntStream.range(0, minSubNodes)
+        .map(i -> (int) (i * nodesInDivision))
+        .mapToObj(fromIndex -> nodes.subList(fromIndex, (int) (fromIndex + nodesInDivision) + 1))
         .collect(Collectors.toSet());
-    Set<Node> nodes2 = nodes.subList(halfSize, nodes.size())
-        .stream()
-        .collect(Collectors.toSet());
-    division.add(nodes1);
-    division.add(nodes2);
-    return division;
   }
 
-  private double boundMin(Node node) {
-    return node.spatialKey().bound(0).min();
+  private int getLongestBoundDimension(TreeNode node) {
+    SpatialKey key = node.spatialKey();
+    int longestDim = 0;
+    double maxLength = key.bound(longestDim).length();
+    for (int i = 0; i < key.dimensions(); i++) {
+      if (key.bound(i).length() > maxLength){
+        longestDim = i;
+        maxLength = key.bound(longestDim).length();
+      }
+    }
+    return longestDim;
+  }
+
+  private double boundMin(Node node, int dimension) {
+    return node.spatialKey().bound(dimension).min();
   }
 }

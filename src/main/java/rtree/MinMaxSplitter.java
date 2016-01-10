@@ -1,14 +1,15 @@
 package rtree;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public abstract class MinMaxSplitter implements NodeSplitter {
 
-  private final int minSubNodes;
+  protected final int minSubNodes;
 
-  private final int maxSubNodes;
+  protected final int maxSubNodes;
 
   public MinMaxSplitter(int minSubNodes, int maxSubNodes) {
     this.minSubNodes = minSubNodes;
@@ -17,26 +18,29 @@ public abstract class MinMaxSplitter implements NodeSplitter {
 
   @Override
   public Optional<Set<TreeNode>> split(TreeNode node) {
-    if (node.subNodes().size() > maxSubNodes) {
-      Set<TreeNode> split = divideSubNodes(node)
-          .stream()
-          .map(this::treeNode)
-          .collect(Collectors.toSet());
-      return Optional.of(split);
-    } else {
-      return Optional.empty();
-    }
+    return Optional.ofNullable(isSplittable(node) ? divideAndCollect(node) : null);
   }
 
-  protected abstract Set<Set<Node>> divideSubNodes(TreeNode node);
+  private Set<TreeNode> divideAndCollect(TreeNode node) {
+    return divideSubNodes(node)
+            .stream()
+            .map(this::treeNode)
+            .collect(Collectors.toSet());
+  }
 
-  private TreeNode treeNode(Set<Node> division) {
+  private boolean isSplittable(TreeNode node) {
+    return node.subNodes().size() > maxSubNodes;
+  }
+
+  protected abstract Collection<Collection<Node>> divideSubNodes(TreeNode node);
+
+  private TreeNode treeNode(Collection<Node> division) {
     TreeNode treeNode = new TreeNode(getKey(division));
     division.forEach(treeNode::addSubNode);
     return treeNode;
   }
 
-  private SpatialKey getKey(Set<Node> division) {
+  private SpatialKey getKey(Collection<Node> division) {
     return division.iterator().next().spatialKey();
   }
 }
