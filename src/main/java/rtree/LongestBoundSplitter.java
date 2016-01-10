@@ -18,11 +18,15 @@ public class LongestBoundSplitter extends MinMaxSplitter {
         .stream()
         .sorted(Comparator.comparingDouble((subNode) -> boundMin(subNode, dimension)))
         .collect(Collectors.toList());
-    double nodesInDivision = 1.0 * nodes.size() / minSubNodes;
     return IntStream.range(0, minSubNodes)
-        .map(i -> (int) (i * nodesInDivision))
-        .mapToObj(fromIndex -> nodes.subList(fromIndex, (int) (fromIndex + nodesInDivision) + 1))
+        .mapToObj(i -> subList(nodes, i))
         .collect(Collectors.toSet());
+  }
+
+  private List<Node> subList(List<Node> nodes, int i) {
+    int fromIndex = nodes.size() * i / minSubNodes;
+    int toIndex = nodes.size() * (i + 1) / minSubNodes;
+    return nodes.subList(fromIndex, toIndex);
   }
 
   private int getLongestBoundDimension(TreeNode node) {
