@@ -1,6 +1,5 @@
 package rtree;
 
-import org.assertj.core.api.Condition;
 import org.junit.Before;
 import org.junit.Test;
 

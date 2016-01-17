@@ -13,13 +13,16 @@ public class RTree<T> {
 
   private final int dimensions;
 
-  private NodeSplitter splitter;
+  private final NodeSplitter splitter;
+
+  private final NodeFactory nodeFactory;
 
   private TreeNode rootNode = null;
 
   public RTree(int dimensions, NodeSplitter splitter) {
     this.dimensions = dimensions;
     this.splitter = splitter;
+    nodeFactory = NodeFactory.inMemory();
   }
 
   public int dimensions() {
@@ -28,7 +31,7 @@ public class RTree<T> {
 
   public void insert(final SpatialKey key, final T data) {
     checkKeyDimensions(key);
-    new InsertionPerformer(new LeafNode<>(key, data)).insert();
+    new InsertionPerformer(nodeFactory.leaf(key, data)).insert();
   }
 
   public Set<T> intersection(final SpatialKey queryKey) {
@@ -91,7 +94,7 @@ public class RTree<T> {
 
     private void insert() {
       if (isEmpty()) {
-        rootNode = new TreeNode(leafNode.spatialKey());
+        rootNode = nodeFactory.treeNode(leafNode.spatialKey());
         rootNode.addSubNode(leafNode);
       } else {
         Optional<Set<TreeNode>> split = insertToSubNode(rootNode);
@@ -126,7 +129,7 @@ public class RTree<T> {
     }
 
     private void makeNewRoot(Set<TreeNode> nodes) {
-      rootNode = new TreeNode(leafNode.spatialKey());
+      rootNode = nodeFactory.treeNode(leafNode.spatialKey());
       nodes.forEach(rootNode::addSubNode);
       update(rootNode);
     }
