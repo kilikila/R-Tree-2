@@ -19,10 +19,10 @@ public class RTree<T> {
 
   private TreeNode rootNode = null;
 
-  public RTree(int dimensions, NodeSplitter splitter) {
+  public RTree(int dimensions, NodeSplitter splitter, NodeFactory nodeFactory) {
     this.dimensions = dimensions;
     this.splitter = splitter;
-    nodeFactory = NodeFactory.inMemory();
+    this.nodeFactory = nodeFactory;
   }
 
   public int dimensions() {
@@ -58,6 +58,8 @@ public class RTree<T> {
 
   public static class Builder<T> {
 
+    private NodeFactory factory = NodeFactory.inMemory();
+
     private int dimensions = 2;
 
     private NodeSplitter splitter = new LongestBoundSplitter(4, 10);
@@ -73,13 +75,18 @@ public class RTree<T> {
       return builder.dimensions(dimensions).nodeSplitter(splitter);
     }
 
+    public Builder<T> nodeFactory(NodeFactory factory) {
+      this.factory = factory;
+      return this;
+    }
+
     public Builder<T> nodeSplitter(NodeSplitter splitter) {
       this.splitter = splitter;
       return this;
     }
 
     public RTree<T> create() {
-      return new RTree<>(dimensions, splitter);
+      return new RTree<>(dimensions, splitter, factory);
     }
 
   }
