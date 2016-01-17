@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class RTree<T> {
 
@@ -134,7 +135,8 @@ public class RTree<T> {
       SpatialKey unionKey = node.subNodes()
           .stream()
           .map(Node::spatialKey)
-          .collect(leafNode::spatialKey, SpatialKey::union, SpatialKey::union);
+          .collect(Collectors.reducing(SpatialKey::union))
+          .get();
       node.spatialKey(unionKey);
     }
 

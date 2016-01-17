@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 
 public class Benchmark {
 
+  private static final int DATA_SIZE = 100000;
+
   private final Map<SpatialKey, Double> data;
 
   private final int dimensions = 3;
@@ -25,13 +27,14 @@ public class Benchmark {
   public static void main(String[] args) {
     new Benchmark(
         new BenchmarkSetup("with splitter 4, 10", new LongestBoundSplitter(4, 10)),
-        new BenchmarkSetup("with splitter 40, 100", new LongestBoundSplitter(4, 10))).run();
+        new BenchmarkSetup("with splitter 40, 100", new LongestBoundSplitter(40, 100)),
+        new BenchmarkSetup("with splitter 400, 1000", new LongestBoundSplitter(400, 1000))).run();
   }
 
   public Benchmark(BenchmarkSetup... setups) {
     this.setups = Lists.newArrayList(setups);
     SpatialKey boundingBox = SpatialKeyTest.cube(20, dimensions);
-    data = RTreeTest.generateSyntheticData(SpatialKey::volume, 10000, boundingBox);
+    data = RTreeTest.generateSyntheticData(SpatialKey::volume, DATA_SIZE, boundingBox);
   }
 
   private RTree<Double> constructTree(NodeSplitter splitter) {
@@ -43,9 +46,11 @@ public class Benchmark {
   }
 
   private void run() {
-    rawSearch();
-    setups.stream().forEach((setup) ->
-        testAndLog(setup.setupTitle, constructTree(setup.splitter)));
+    for (int i = 0; i < 3; i++) {
+      rawSearch();
+      setups.stream().forEach((setup) ->
+          testAndLog(setup.setupTitle, constructTree(setup.splitter)));
+    }
   }
 
   private void rawSearch() {
@@ -66,14 +71,12 @@ public class Benchmark {
   }
 
   private void testInsert(RTree<Double> tree) {
-    System.out.println("Inserting " + data.size() + " items in tree");
     Stopwatch stopwatch = Stopwatch.createStarted();
     data.forEach(tree::insert);
     System.out.println("Inserted data. Elapsed time: " + stopwatch);
   }
 
   private void testSearch(RTree<Double> tree) {
-    System.out.println("Searching");
     Stopwatch stopwatch = Stopwatch.createStarted();
     Set<Double> result = tree.intersection(queryKey);
     System.out.println("Search performed. " + result.size() + " items found. Elapsed time: " + stopwatch);
