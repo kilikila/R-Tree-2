@@ -14,17 +14,17 @@ public class RTree<T> {
 
   private final NodeSplitter splitter;
 
-  private final SubNodeSelector selector;
+  private final SubNodeSelector nodeSelector;
 
   private final NodeFactory nodeFactory;
 
   private TreeNode rootNode = null;
 
-  public RTree(int dimensions, NodeSplitter splitter, NodeFactory nodeFactory) {
+  public RTree(int dimensions, NodeSplitter splitter, SubNodeSelector nodeSelector, NodeFactory nodeFactory) {
     this.dimensions = dimensions;
     this.splitter = splitter;
+    this.nodeSelector = nodeSelector;
     this.nodeFactory = nodeFactory;
-    this.selector = new VolumeIncreaseSelector();
   }
 
   public int dimensions() {
@@ -66,6 +66,8 @@ public class RTree<T> {
 
     private NodeSplitter splitter = new LongestBoundSplitter(4, 10);
 
+    private SubNodeSelector nodeSelector = new VolumeIncreaseSelector();
+
     public Builder<T> dimensions(int dimensions) {
       Preconditions.checkArgument(dimensions > 0, "Dimensions must be positive, you set %s", dimensions);
       this.dimensions = dimensions;
@@ -88,7 +90,7 @@ public class RTree<T> {
     }
 
     public RTree<T> create() {
-      return new RTree<>(dimensions, splitter, factory);
+      return new RTree<>(dimensions, splitter, nodeSelector, factory);
     }
 
   }
@@ -115,7 +117,7 @@ public class RTree<T> {
       if (subNodesAreLeaves(node)) {
         node.addSubNode(leafNode);
       } else {
-        TreeNode subNode = selector.chooseSubNode(node, leafNode);
+        TreeNode subNode = nodeSelector.chooseSubNode(node, leafNode);
         Optional<Set<TreeNode>> split = insertToSubNode(subNode);
         split.ifPresent(nodes -> replaceWithNodes(node, subNode, nodes));
       }

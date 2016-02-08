@@ -1,35 +1,21 @@
 package rtree;
 
-import java.util.Comparator;
-
-public class VolumeIncreaseSelector implements SubNodeSelector {
+public class VolumeIncreaseSelector extends MinimalMetricsSelector {
 
   @Override
-  public TreeNode chooseSubNode(TreeNode node, LeafNode<?> leafNode) {
-    return new NodeSelectorPerformer(node, leafNode).choose();
+  protected NodeComparator supplyComparator(LeafNode<?> leafNode) {
+    return new VolumeNodeComparator(leafNode);
   }
 
-  class NodeSelectorPerformer {
+  private static class VolumeNodeComparator extends NodeComparator {
 
-    private TreeNode node;
-
-    private LeafNode<?> leafNode;
-
-    public NodeSelectorPerformer(TreeNode node, LeafNode<?> leafNode) {
-      this.node = node;
-      this.leafNode = leafNode;
+    public VolumeNodeComparator(LeafNode<?> leafNode) {
+      super(leafNode);
     }
 
-    public TreeNode choose() {
-      Node chosenSubNode = node.subNodes()
-          .stream()
-          .min(Comparator.comparingDouble(this::volumeIncrease))
-          .orElseThrow(IllegalStateException::new);
-      if (chosenSubNode instanceof TreeNode) {
-        return (TreeNode) chosenSubNode;
-      } else {
-        throw new IllegalStateException("Incorrect node type");
-      }
+    @Override
+    public int compare(Node o1, Node o2) {
+      return Double.compare(volumeIncrease(o1), volumeIncrease(o2));
     }
 
     private double volumeIncrease(Node node) {
