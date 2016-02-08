@@ -8,7 +8,7 @@ import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class VolumeIncreaseSelectorTest {
+public class SubNodeSelectorTest {
 
   @Test
   public void testTrivialSelection() {
@@ -25,13 +25,13 @@ public class VolumeIncreaseSelectorTest {
     node.addSubNode(new TreeNode(cube4));
     node.addSubNode(new TreeNode(cube5));
     LeafNode<Object> leafNode = new LeafNode<>(inside(cube4), new Object());
-    TreeNode chosen = new VolumeIncreaseSelector().chooseSubNode(node, leafNode);
+    TreeNode chosen = getSelector().chooseSubNode(node, leafNode);
     assertThat(chosen.spatialKey()).isEqualTo(cube4);
   }
 
   @Test
   public void testSelectionWithoutIntersection() {
-    SpatialKey cube1 = SpatialKeyTest.cube(6, 0, 0);
+    SpatialKey cube1 = SpatialKeyTest.cube(6, 0, 1);
     SpatialKey cube2 = SpatialKeyTest.cube(2, 60, 0);
     SpatialKey union = cube1.union(cube2);
     TreeNode node = new TreeNode(union);
@@ -40,7 +40,7 @@ public class VolumeIncreaseSelectorTest {
     node.addSubNode(node1);
     node.addSubNode(node2);
     LeafNode<Object> leafNode = new LeafNode<>(SpatialKeyTest.cube(1, 10, 1), new Object());
-    TreeNode chosen = new VolumeIncreaseSelector().chooseSubNode(node, leafNode);
+    TreeNode chosen = getSelector().chooseSubNode(node, leafNode);
     assertThat(chosen).isEqualTo(node1);
   }
 
@@ -56,6 +56,10 @@ public class VolumeIncreaseSelectorTest {
     double length = bound.length();
     double center = bound.min() + length / 2;
     return new SpatialKey.Bound(center - length / 10, center + length / 10);
+  }
+
+  private SubNodeSelector getSelector() {
+    return new MinimalMetricsSelector(new VolumeNodeComparator());
   }
 
 }

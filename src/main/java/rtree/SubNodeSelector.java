@@ -2,5 +2,5 @@ package rtree;
 
 public interface SubNodeSelector {
 
-  TreeNode chooseSubNode(TreeNode node, LeafNode<?> leafNode);
+  TreeNode chooseSubNode(TreeNode node, Node nodeToInsert);
 }

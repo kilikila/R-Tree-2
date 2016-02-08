@@ -4,9 +4,9 @@ import java.util.Comparator;
 
 public abstract class NodeComparator implements Comparator<Node> {
 
-  protected final LeafNode<?> leafNode;
+  protected Node nodeToInsert;
 
-  public NodeComparator(LeafNode<?> leafNode) {
-    this.leafNode = leafNode;
+  public void setNodeToInsert(Node nodeToInsert) {
+    this.nodeToInsert = nodeToInsert;
   }
 }

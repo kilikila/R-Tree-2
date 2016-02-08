@@ -1,21 +1,25 @@
 package rtree;
 
-public abstract class MinimalMetricsSelector implements SubNodeSelector {
+public class MinimalMetricsSelector implements SubNodeSelector {
+
+  private final NodeComparator nodeComparator;
+
+  protected MinimalMetricsSelector(NodeComparator nodeComparator) {
+    this.nodeComparator = nodeComparator;
+  }
 
   @Override
-  public TreeNode chooseSubNode(TreeNode node, LeafNode<?> leafNode) {
-    return new NodeSelectorPerformer(node, leafNode).choose();
+  public TreeNode chooseSubNode(TreeNode node, Node nodeToInsert) {
+    nodeComparator.setNodeToInsert(nodeToInsert);
+    return new NodeSelectorPerformer(node).choose();
   }
 
   class NodeSelectorPerformer {
 
     private TreeNode node;
 
-    private NodeComparator nodeComparator;
-
-    public NodeSelectorPerformer(TreeNode node, LeafNode<?> leafNode) {
+    public NodeSelectorPerformer(TreeNode node) {
       this.node = node;
-      this.nodeComparator = supplyComparator(leafNode);
     }
 
     public TreeNode choose() {
@@ -30,6 +34,4 @@ public abstract class MinimalMetricsSelector implements SubNodeSelector {
       }
     }
   }
-
-  protected abstract NodeComparator supplyComparator(LeafNode<?> leafNode);
 }
