@@ -11,19 +11,40 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class VolumeIncreaseSelectorTest {
 
   @Test
-  public void testSelectionOfTwo() {
-    SpatialKey cube1 = SpatialKeyTest.cube(2, -1, 0);
-    SpatialKey cube2 = SpatialKeyTest.cube(2, 1, 0);
-    TreeNode node = new TreeNode(cube1.union(cube2));
+  public void testTrivialSelection() {
+    SpatialKey cube1 = SpatialKeyTest.cube(1, 0, 0);
+    SpatialKey cube2 = SpatialKeyTest.cube(1, 1, 0);
+    SpatialKey cube3 = SpatialKeyTest.cube(1, 2, 0);
+    SpatialKey cube4 = SpatialKeyTest.cube(1, 3, 0);
+    SpatialKey cube5 = SpatialKeyTest.cube(1, 4, 0);
+    SpatialKey union = cube1.union(cube2).union(cube3).union(cube4).union(cube5);
+    TreeNode node = new TreeNode(union);
     node.addSubNode(new TreeNode(cube1));
     node.addSubNode(new TreeNode(cube2));
-    SpatialKey center = center(cube1);
-    LeafNode<Object> leafNode = new LeafNode<>(center, new Object());
+    node.addSubNode(new TreeNode(cube3));
+    node.addSubNode(new TreeNode(cube4));
+    node.addSubNode(new TreeNode(cube5));
+    LeafNode<Object> leafNode = new LeafNode<>(inside(cube4), new Object());
     TreeNode chosen = new VolumeIncreaseSelector().chooseSubNode(node, leafNode);
-    assertThat(chosen.spatialKey().equals(cube1));
+    assertThat(chosen.spatialKey()).isEqualTo(cube4);
   }
 
-  private SpatialKey center(SpatialKey key) {
+  @Test
+  public void testSelectionWithoutIntersection() {
+    SpatialKey cube1 = SpatialKeyTest.cube(6, 0, 0);
+    SpatialKey cube2 = SpatialKeyTest.cube(2, 60, 0);
+    SpatialKey union = cube1.union(cube2);
+    TreeNode node = new TreeNode(union);
+    TreeNode node1 = new TreeNode(cube1);
+    TreeNode node2 = new TreeNode(cube2);
+    node.addSubNode(node1);
+    node.addSubNode(node2);
+    LeafNode<Object> leafNode = new LeafNode<>(SpatialKeyTest.cube(1, 10, 1), new Object());
+    TreeNode chosen = new VolumeIncreaseSelector().chooseSubNode(node, leafNode);
+    assertThat(chosen).isEqualTo(node1);
+  }
+
+  private SpatialKey inside(SpatialKey key) {
     List<SpatialKey.Bound> bounds = IntStream.range(0, key.dimensions())
         .mapToObj(key::bound)
         .map(this::boundCenter)
@@ -32,12 +53,9 @@ public class VolumeIncreaseSelectorTest {
   }
 
   private SpatialKey.Bound boundCenter(SpatialKey.Bound bound) {
-    double center = bound.min() + (bound.max() - bound.min()) / 2;
-    return new SpatialKey.Bound(center - 0.1, center + 0.1);
-  }
-
-  private Node randomSubNode(TreeNode treeNode) {
-    return treeNode.subNodes().stream().findAny().get();
+    double length = bound.length();
+    double center = bound.min() + length / 2;
+    return new SpatialKey.Bound(center - length / 10, center + length / 10);
   }
 
 }
