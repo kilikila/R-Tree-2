@@ -177,6 +177,7 @@ public class RTree<T> {
       return result;
     }
 
+    @SuppressWarnings(value = {"unchecked"})
     private void searchSubNodes(Node node) {
       if (node instanceof LeafNode) {
         result.add(((LeafNode<T>) node).data());
