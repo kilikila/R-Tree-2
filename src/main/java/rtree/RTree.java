@@ -24,7 +24,7 @@ public class RTree<T> {
     this.dimensions = dimensions;
     this.splitter = splitter;
     this.nodeFactory = nodeFactory;
-    this.selector = new SubNodeSelector(){};
+    this.selector = new VolumeIncreaseSelector();
   }
 
   public int dimensions() {
