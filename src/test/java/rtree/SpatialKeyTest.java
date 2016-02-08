@@ -28,6 +28,14 @@ public class SpatialKeyTest extends DimensionalTest {
     return new SpatialKey(bounds);
   }
 
+  public static SpatialKey cube(double side, double... centerShifts) {
+    double halfSide = side / 2;
+    List<SpatialKey.Bound> bounds = IntStream.range(0, centerShifts.length)
+        .mapToObj(i -> new SpatialKey.Bound(-halfSide + centerShifts[i], halfSide + centerShifts[i]))
+        .collect(Collectors.toList());
+    return new SpatialKey(bounds);
+  }
+
   public static SpatialKey randomBox(SpatialKey boundingBox) {
     List<SpatialKey.Bound> bounds = IntStream.range(0, boundingBox.dimensions())
         .mapToObj(boundingBox::bound)

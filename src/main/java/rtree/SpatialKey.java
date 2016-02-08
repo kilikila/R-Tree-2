@@ -47,6 +47,22 @@ public class SpatialKey {
     return volume.get();
   }
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    SpatialKey that = (SpatialKey) o;
+    return IntStream.range(0, dimensions())
+        .mapToObj(i -> this.bound(i).equals(that.bound(i)))
+        .allMatch(b -> b.equals(true));
+
+  }
+
+  @Override
+  public int hashCode() {
+    return bounds.hashCode();
+  }
+
   public static class Bound {
 
     private final double min;
@@ -79,7 +95,28 @@ public class SpatialKey {
     public double length() {
       return max - min;
     }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      Bound bound = (Bound) o;
+      return Double.compare(bound.min, min) == 0 && Double.compare(bound.max, max) == 0;
+
+    }
+
+    @Override
+    public int hashCode() {
+      int result;
+      long temp;
+      temp = Double.doubleToLongBits(min);
+      result = (int) (temp ^ (temp >>> 32));
+      temp = Double.doubleToLongBits(max);
+      result = 31 * result + (int) (temp ^ (temp >>> 32));
+      return result;
+    }
   }
+
   public static Builder builder(int dimensions) {
     return new Builder(dimensions);
   }
