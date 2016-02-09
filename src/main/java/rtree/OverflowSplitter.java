@@ -5,7 +5,6 @@ import com.google.common.base.Preconditions;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public abstract class OverflowSplitter implements NodeSplitter {
 
@@ -23,23 +22,16 @@ public abstract class OverflowSplitter implements NodeSplitter {
 
   @Override
   public Optional<Set<TreeNode>> split(TreeNode node) {
-    return Optional.ofNullable(isSplittable(node) ? divideAndCollect(node) : null);
+    return Optional.ofNullable(isDividable(node) ? divide(node) : null);
   }
 
-  private Set<TreeNode> divideAndCollect(TreeNode node) {
-    return divideSubNodes(node)
-            .stream()
-            .map(this::treeNode)
-            .collect(Collectors.toSet());
-  }
+  protected abstract Set<TreeNode> divide(TreeNode node);
 
-  private boolean isSplittable(TreeNode node) {
+  private boolean isDividable(TreeNode node) {
     return node.subNodes().size() > maxSubNodes;
   }
 
-  protected abstract Set<Collection<Node>> divideSubNodes(TreeNode node);
-
-  private TreeNode treeNode(Collection<Node> division) {
+  protected TreeNode treeNode(Collection<Node> division) {
     TreeNode treeNode = new TreeNode(getKey(division));
     division.forEach(treeNode::addSubNode);
     return treeNode;

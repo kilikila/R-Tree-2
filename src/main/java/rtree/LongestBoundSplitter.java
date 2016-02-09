@@ -1,41 +1,63 @@
 package rtree;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import com.google.common.collect.Sets;
+
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class LongestBoundSplitter extends OverflowSplitter {
 
+  private final Set<TreeNode> divisions = Sets.newHashSet();
+
   public LongestBoundSplitter(int minSubNodes, int maxSubNodes) {
     super(minSubNodes, maxSubNodes);
   }
 
-  protected Set<Collection<Node>> divideSubNodes(TreeNode node) {
-    int dimension = getLongestBoundDimension(node);
-    List<Node> nodes = node.subNodes()
-        .stream()
+  public Set<TreeNode> divide(TreeNode node) {
+    divisions.add(node);
+    while (divisions.size() < minSubNodes) {
+      splitBiggest();
+    }
+    return divisions;
+  }
+
+  private void splitBiggest() {
+    TreeNode division = biggestDivision();
+    int dimension = getLongestBoundDimension(division.spatialKey());
+    List<Node> sortedNodes = division.subNodes().stream()
         .sorted(Comparator.comparingDouble((subNode) -> boundMin(subNode, dimension)))
         .collect(Collectors.toList());
-    return IntStream.range(0, minSubNodes)
-        .mapToObj(i -> subList(nodes, i))
-        .collect(Collectors.toSet());
+    int splitIndex = sortedNodes.size() / 2;
+    Set<Node> nodes1 = Sets.newHashSet(sortedNodes.subList(0, splitIndex));
+    Set<Node> nodes2 = Sets.newHashSet(sortedNodes.subList(splitIndex, sortedNodes.size()));
+    divisions.remove(division);
+    addDivision(nodes1);
+    addDivision(nodes2);
   }
 
-  private List<Node> subList(List<Node> nodes, int i) {
-    int fromIndex = nodes.size() * i / minSubNodes;
-    int toIndex = nodes.size() * (i + 1) / minSubNodes;
-    return nodes.subList(fromIndex, toIndex);
+  private void addDivision(Set<Node> nodes) {
+    SpatialKey spatialKey = nodes.stream()
+        .map(Node::spatialKey)
+        .reduce(SpatialKey::union)
+        .get();
+    TreeNode treeNode = new TreeNode(spatialKey);
+    nodes.forEach(treeNode::addSubNode);
+    divisions.add(treeNode);
   }
 
-  private int getLongestBoundDimension(TreeNode node) {
-    SpatialKey key = node.spatialKey();
+  private TreeNode biggestDivision() {
+    return divisions.stream()
+        .filter(node -> node.subNodes().size() >= 2)
+        .max(Comparator.comparingDouble(node -> node.spatialKey().volume()))
+        .get();
+  }
+
+  private int getLongestBoundDimension(SpatialKey key) {
     int longestDim = 0;
     double maxLength = key.bound(longestDim).length();
     for (int i = 0; i < key.dimensions(); i++) {
-      if (key.bound(i).length() > maxLength){
+      if (key.bound(i).length() > maxLength) {
         longestDim = i;
         maxLength = key.bound(longestDim).length();
       }
