@@ -42,7 +42,7 @@ public class RTreeTest extends DimensionalTest {
   public void testIntersection() {
     Set<SpatialKey> wholeDataSet = tree.intersection(boundingBox);
     assertThat(wholeDataSet).hasSize(DATA_SIZE);
-    SpatialKey queryKey = SpatialKeyTest.randomBox(SpatialKeyTest.cube(5, dimensions));
+    SpatialKey queryKey = SpatialKeyTest.randomBox(SpatialKeyTest.cube(5, dimensions), 1.0);
     Set<SpatialKey> intersection = tree.intersection(queryKey);
     assertThat(wholeDataSet).containsAll(intersection);
     boolean allLayInQueryKey = intersection.stream().allMatch(queryKey::intersects);
@@ -59,7 +59,7 @@ public class RTreeTest extends DimensionalTest {
       int dataSize,
       SpatialKey boundingBox) {
     return IntStream.range(0, dataSize)
-        .mapToObj(i -> SpatialKeyTest.randomBox(boundingBox))
+        .mapToObj(i -> SpatialKeyTest.randomBox(boundingBox, 1.0))
         .collect(Collectors.toMap(key -> key, dataExtractor));
   }
 

@@ -14,14 +14,13 @@ public class Benchmark {
 
   private final Map<SpatialKey, Double> data;
 
-  private final int dimensions = 3;
+  private final int dimensions = 2;
 
   private final List<BenchmarkSetup> setups;
 
   private final SpatialKey queryKey = SpatialKey.builder(dimensions)
       .setBound(0, -5, 5)
       .setBound(1, 0, 0)
-      .setBound(2, -3, 2)
       .create();
 
   public static void main(String[] args) {

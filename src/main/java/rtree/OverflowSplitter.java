@@ -30,14 +30,4 @@ public abstract class OverflowSplitter implements NodeSplitter {
   private boolean isDividable(TreeNode node) {
     return node.subNodes().size() > maxSubNodes;
   }
-
-  protected TreeNode treeNode(Collection<Node> division) {
-    TreeNode treeNode = new TreeNode(getKey(division));
-    division.forEach(treeNode::addSubNode);
-    return treeNode;
-  }
-
-  private SpatialKey getKey(Collection<Node> division) {
-    return division.iterator().next().spatialKey();
-  }
 }

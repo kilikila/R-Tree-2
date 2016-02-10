@@ -16,7 +16,7 @@ public class SpatialKeyTest extends DimensionalTest {
 
   @Test
   public void testNew() {
-    SpatialKey randomBox = randomBox(cube(10, dimensions));
+    SpatialKey randomBox = randomBox(cube(10, dimensions), 1.0);
     assertThat(randomBox.dimensions()).isEqualTo(dimensions);
   }
 
@@ -36,17 +36,18 @@ public class SpatialKeyTest extends DimensionalTest {
     return new SpatialKey(bounds);
   }
 
-  public static SpatialKey randomBox(SpatialKey boundingBox) {
+  public static SpatialKey randomBox(SpatialKey boundingBox, double maxBoundLength) {
     List<SpatialKey.Bound> bounds = IntStream.range(0, boundingBox.dimensions())
         .mapToObj(boundingBox::bound)
-        .map(bound -> randomBound(bound.min(), bound.max()))
+        .map(bound -> randomBound(bound.min(), bound.max(), maxBoundLength))
         .collect(Collectors.toList());
     return new SpatialKey(bounds);
   }
 
-  private static SpatialKey.Bound randomBound(double min, double max) {
+  private static SpatialKey.Bound randomBound(double min, double max, double maxBoundLength) {
     double randMin = min + Math.random() * (max - min);
-    double randMax = randMin + Math.random() * (max - randMin);
+    double boundLength = Math.random() * (max - randMin);
+    double randMax = randMin + (boundLength > maxBoundLength ? maxBoundLength : boundLength);
     return new SpatialKey.Bound(randMin, randMax);
   }
 }

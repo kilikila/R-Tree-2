@@ -15,6 +15,7 @@ public class LongestBoundSplitter extends OverflowSplitter {
   }
 
   public Set<TreeNode> divide(TreeNode node) {
+    divisions.clear();
     divisions.add(node);
     while (divisions.size() < minSubNodes) {
       splitBiggest();
@@ -37,10 +38,7 @@ public class LongestBoundSplitter extends OverflowSplitter {
   }
 
   private void addDivision(Set<Node> nodes) {
-    SpatialKey spatialKey = nodes.stream()
-        .map(Node::spatialKey)
-        .reduce(SpatialKey::union)
-        .get();
+    SpatialKey spatialKey = nodes.iterator().next().spatialKey();
     TreeNode treeNode = new TreeNode(spatialKey);
     nodes.forEach(treeNode::addSubNode);
     divisions.add(treeNode);

@@ -20,6 +20,7 @@ public abstract class OverflowSplitterTest extends SplitterTest {
 
   @Test
   public void testSplitContainsExactlyMin() {
+    addSubNodesEnoughToSplit(nodeToSplit);
     int splitSize = supplySplitter().split(nodeToSplit).get().size();
     assertThat(splitSize).isEqualTo(minSubNodes);
   }
@@ -28,7 +29,7 @@ public abstract class OverflowSplitterTest extends SplitterTest {
   protected abstract OverflowSplitter supplySplitter();
 
   @Override
-  protected void addSubNodesEnoughToSplit() {
+  protected void addSubNodesEnoughToSplit(TreeNode nodeToSplit) {
     Set<TreeNode> nodes = IntStream.range(0, maxSubNodes + 1)
         .mapToObj(i -> new TreeNode(randomKey()))
         .collect(Collectors.toSet());
@@ -36,6 +37,6 @@ public abstract class OverflowSplitterTest extends SplitterTest {
   }
 
   private SpatialKey randomKey() {
-    return SpatialKeyTest.randomBox(nodeToSplit.spatialKey());
+    return SpatialKeyTest.randomBox(nodeToSplit.spatialKey(), 1.0);
   }
 }
