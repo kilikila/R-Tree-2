@@ -7,6 +7,10 @@ import rtree.TreeNode;
 
 public class PersistentNodeFactory implements NodeFactory {
 
+  public PersistentNodeFactory(String filename) {
+
+  }
+
   @Override
   public TreeNode treeNode(SpatialKey key) {
     return new PersistentTreeNode(key);

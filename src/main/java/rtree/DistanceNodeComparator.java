@@ -6,7 +6,7 @@ import java.util.stream.IntStream;
 
 public class DistanceNodeComparator implements NodeComparator {
 
-  List<Double> center;
+  private List<Double> center;
 
   @Override
   public void setNodeToInsert(Node nodeToInsert) {
@@ -21,7 +21,7 @@ public class DistanceNodeComparator implements NodeComparator {
   private double distance(List<Double> center) {
     return Math.sqrt(IntStream.range(0, center.size())
         .mapToObj(i -> center.get(i) - this.center.get(i))
-        .mapToDouble(l -> Math.pow(l, 2))
+        .mapToDouble(d -> Math.pow(d, 2))
         .sum());
   }
 

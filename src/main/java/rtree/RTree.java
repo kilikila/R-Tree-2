@@ -1,6 +1,7 @@
 package rtree;
 
 import com.google.common.base.Preconditions;
+import rtree.persistent.PersistentNodeFactory;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -80,12 +81,12 @@ public class RTree<T> {
     }
 
     public Builder<T> nodeComparator(NodeComparator comparator) {
-      this.nodeSelector.setNodeComparator(comparator);
+      this.nodeSelector = new SubNodeSelector(comparator);
       return this;
     }
 
-    public Builder<T> nodeFactory(NodeFactory factory) {
-      this.factory = factory;
+    public Builder<T> persistent(String filename) {
+      this.factory = new PersistentNodeFactory(filename);
       return this;
     }
 

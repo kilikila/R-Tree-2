@@ -2,11 +2,7 @@ package rtree;
 
 public class SubNodeSelector {
 
-  public void setNodeComparator(NodeComparator nodeComparator) {
-    this.nodeComparator = nodeComparator;
-  }
-
-  private NodeComparator nodeComparator;
+  private final NodeComparator nodeComparator;
 
   protected SubNodeSelector(NodeComparator nodeComparator) {
     this.nodeComparator = nodeComparator;
