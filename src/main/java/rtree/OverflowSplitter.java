@@ -28,6 +28,6 @@ public abstract class OverflowSplitter implements NodeSplitter {
   protected abstract Set<TreeNode> divide(TreeNode node);
 
   private boolean isDividable(TreeNode node) {
-    return node.subNodes().size() > maxSubNodes;
+    return node.numOfSubs() > maxSubNodes;
   }
 }

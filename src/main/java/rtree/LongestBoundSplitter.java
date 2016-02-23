@@ -4,7 +4,6 @@ import com.google.common.collect.Sets;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class LongestBoundSplitter extends OverflowSplitter {
 
@@ -26,7 +25,7 @@ public class LongestBoundSplitter extends OverflowSplitter {
   private void splitBiggest() {
     TreeNode division = biggestDivision();
     int dimension = getLongestBoundDimension(division.spatialKey());
-    List<Node> sortedNodes = division.subNodes().stream()
+    List<Node> sortedNodes = division.subNodes()
         .sorted(Comparator.comparingDouble((subNode) -> boundMin(subNode, dimension)))
         .collect(Collectors.toList());
     int splitIndex = sortedNodes.size() / 2;
@@ -39,14 +38,14 @@ public class LongestBoundSplitter extends OverflowSplitter {
 
   private void addDivision(Set<Node> nodes) {
     SpatialKey spatialKey = nodes.iterator().next().spatialKey();
-    TreeNode treeNode = new TreeNode(spatialKey);
+    TreeNode treeNode = new TreeNode.InMemory(spatialKey);
     nodes.forEach(treeNode::addSubNode);
     divisions.add(treeNode);
   }
 
   private TreeNode biggestDivision() {
     return divisions.stream()
-        .filter(node -> node.subNodes().size() > 2)
+        .filter(node -> node.numOfSubs() > 2)
         .max(Comparator.comparingDouble(node -> node.spatialKey().volume()))
         .get();
   }

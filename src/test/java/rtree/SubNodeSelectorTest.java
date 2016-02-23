@@ -29,13 +29,13 @@ public class SubNodeSelectorTest {
     SpatialKey cube4 = SpatialKeyTest.cube(1, 3, 0);
     SpatialKey cube5 = SpatialKeyTest.cube(1, 4, 0);
     SpatialKey union = cube1.union(cube2).union(cube3).union(cube4).union(cube5);
-    TreeNode node = new TreeNode(union);
-    node.addSubNode(new TreeNode(cube1));
-    node.addSubNode(new TreeNode(cube2));
-    node.addSubNode(new TreeNode(cube3));
-    node.addSubNode(new TreeNode(cube4));
-    node.addSubNode(new TreeNode(cube5));
-    LeafNode<Object> leafNode = new LeafNode<>(inside(cube4), new Object());
+    TreeNode node = new TreeNode.InMemory(union);
+    node.addSubNode(new TreeNode.InMemory(cube1));
+    node.addSubNode(new TreeNode.InMemory(cube2));
+    node.addSubNode(new TreeNode.InMemory(cube3));
+    node.addSubNode(new TreeNode.InMemory(cube4));
+    node.addSubNode(new TreeNode.InMemory(cube5));
+    LeafNode<Object> leafNode = new LeafNode.InMemory<>(inside(cube4), new Object());
     TreeNode chosen = getSelector().chooseSubNode(node, leafNode);
     assertThat(chosen.spatialKey()).isEqualTo(cube4);
   }
@@ -45,12 +45,12 @@ public class SubNodeSelectorTest {
     SpatialKey cube1 = SpatialKeyTest.cube(6, 0, 1);
     SpatialKey cube2 = SpatialKeyTest.cube(2, 60, 0);
     SpatialKey union = cube1.union(cube2);
-    TreeNode node = new TreeNode(union);
-    TreeNode node1 = new TreeNode(cube1);
-    TreeNode node2 = new TreeNode(cube2);
+    TreeNode node = new TreeNode.InMemory(union);
+    TreeNode node1 = new TreeNode.InMemory(cube1);
+    TreeNode node2 = new TreeNode.InMemory(cube2);
     node.addSubNode(node1);
     node.addSubNode(node2);
-    LeafNode<Object> leafNode = new LeafNode<>(SpatialKeyTest.cube(1, 10, 1), new Object());
+    LeafNode<Object> leafNode = new LeafNode.InMemory<>(SpatialKeyTest.cube(1, 10, 1), new Object());
     TreeNode chosen = getSelector().chooseSubNode(node, leafNode);
     assertThat(chosen).isEqualTo(node1);
   }

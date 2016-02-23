@@ -19,7 +19,7 @@ public abstract class SplitterTest extends DimensionalTest{
 
   @Before
   public void setUp() {
-    nodeToSplit = new TreeNode(SpatialKeyTest.cube(20, dimensions));
+    nodeToSplit = new TreeNode.InMemory(SpatialKeyTest.cube(20, dimensions));
   }
 
   @Test
@@ -36,17 +36,17 @@ public abstract class SplitterTest extends DimensionalTest{
     Optional<Set<TreeNode>> split = splitter.split(nodeToSplit);
     assertThat(split.isPresent()).isTrue();
     Set<TreeNode> newNodes = split.get();
-    assertThat(numberOfSubNodes(newNodes)).isEqualTo(nodeToSplit.subNodes().size());
+    assertThat(numberOfSubNodes(newNodes)).isEqualTo(nodeToSplit.numOfSubs());
     Set<Node> allSubNodes = newNodes.stream()
-        .flatMap(node -> node.subNodes().stream())
+        .flatMap(TreeNode::subNodes)
         .collect(Collectors.toSet());
-    assertThat(allSubNodes).containsAll(nodeToSplit.subNodes());
-    assertThat(allSubNodes).containsOnlyElementsOf(nodeToSplit.subNodes());
+    assertThat(allSubNodes).containsAll(nodeToSplit.subNodes().collect(Collectors.toSet()));
+    assertThat(allSubNodes).containsOnlyElementsOf(nodeToSplit.subNodes().collect(Collectors.toSet()));
     return newNodes;
   }
 
   private int numberOfSubNodes(Set<TreeNode> newNodes) {
-    return newNodes.stream().map(TreeNode::subNodes).mapToInt(Set::size).sum();
+    return newNodes.stream().mapToInt(TreeNode::numOfSubs).sum();
   }
 
   protected abstract NodeSplitter supplySplitter();

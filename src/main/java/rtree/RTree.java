@@ -130,7 +130,7 @@ public class RTree<T> {
     }
 
     private void replaceWithNodes(TreeNode node, TreeNode subNode, Set<TreeNode> newNodes) {
-      node.subNodes().remove(subNode);
+      node.removeSub(subNode);
       newNodes.forEach(node::addSubNode);
     }
 
@@ -152,7 +152,6 @@ public class RTree<T> {
 
     private void update(TreeNode node) {
       SpatialKey unionKey = node.subNodes()
-          .stream()
           .map(Node::spatialKey)
           .collect(Collectors.reducing(SpatialKey::union))
           .get();
@@ -160,7 +159,7 @@ public class RTree<T> {
     }
 
     private boolean subNodesAreLeaves(TreeNode node) {
-      return node.subNodes().iterator().next() instanceof LeafNode;
+      return node.subNodes().iterator().next() instanceof LeafNode.InMemory;
     }
 
   }
@@ -184,11 +183,10 @@ public class RTree<T> {
 
     @SuppressWarnings(value = {"unchecked"})
     private void searchSubNodes(Node node) {
-      if (node instanceof LeafNode) {
+      if (node instanceof LeafNode.InMemory) {
         result.add(((LeafNode<T>) node).data());
       } else {
         ((TreeNode) node).subNodes()
-            .stream()
             .filter(condition)
             .forEach(this::searchSubNodes);
       }

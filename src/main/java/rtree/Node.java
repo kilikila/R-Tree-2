@@ -1,17 +1,26 @@
 package rtree;
 
-public abstract class Node {
-  private SpatialKey key;
+public interface Node {
 
-  public Node(SpatialKey key) {
-    this.key = key;
-  }
+  SpatialKey spatialKey();
 
-  public SpatialKey spatialKey() {
-    return key;
-  }
+  void spatialKey(SpatialKey key);
 
-  public void spatialKey(SpatialKey key) {
-    this.key = key;
+  abstract class InMemory implements Node {
+    private SpatialKey key;
+
+    public InMemory(SpatialKey key) {
+      this.key = key;
+    }
+
+    @Override
+    public SpatialKey spatialKey() {
+      return key;
+    }
+
+    @Override
+    public void spatialKey(SpatialKey key) {
+      this.key = key;
+    }
   }
 }

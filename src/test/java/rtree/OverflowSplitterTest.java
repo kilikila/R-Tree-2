@@ -31,7 +31,7 @@ public abstract class OverflowSplitterTest extends SplitterTest {
   @Override
   protected void addSubNodesEnoughToSplit(TreeNode nodeToSplit) {
     Set<TreeNode> nodes = IntStream.range(0, maxSubNodes + 1)
-        .mapToObj(i -> new TreeNode(randomKey()))
+        .mapToObj(i -> new TreeNode.InMemory(randomKey()))
         .collect(Collectors.toSet());
     nodes.forEach(nodeToSplit::addSubNode);
   }

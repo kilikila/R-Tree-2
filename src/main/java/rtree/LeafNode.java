@@ -1,15 +1,21 @@
 package rtree;
 
-public class LeafNode<T> extends Node {
+public interface LeafNode<T> extends Node {
 
-  private final T data;
+  T data();
 
-  public LeafNode(SpatialKey key, T data) {
-    super(key);
-    this.data = data;
-  }
+  class InMemory<T> extends Node.InMemory implements LeafNode<T> {
 
-  public T data() {
-    return data;
+    private final T data;
+
+    public InMemory(SpatialKey key, T data) {
+      super(key);
+      this.data = data;
+    }
+
+    @Override
+    public T data() {
+      return data;
+    }
   }
 }
