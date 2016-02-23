@@ -46,7 +46,7 @@ public class LongestBoundSplitter extends OverflowSplitter {
 
   private TreeNode biggestDivision() {
     return divisions.stream()
-        .filter(node -> node.subNodes().size() >= 2)
+        .filter(node -> node.subNodes().size() > 2)
         .max(Comparator.comparingDouble(node -> node.spatialKey().volume()))
         .get();
   }

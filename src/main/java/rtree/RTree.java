@@ -66,7 +66,7 @@ public class RTree<T> {
 
     private NodeSplitter splitter = new LongestBoundSplitter(4, 10);
 
-    private SubNodeSelector nodeSelector = new MinimalMetricsSelector(new VolumeNodeComparator());
+    private SubNodeSelector nodeSelector = new SubNodeSelector(new VolumeIncreaseNodeComparator());
 
     public Builder<T> dimensions(int dimensions) {
       Preconditions.checkArgument(dimensions > 0, "Dimensions must be positive, you set %s", dimensions);
@@ -77,6 +77,11 @@ public class RTree<T> {
     public <D> Builder<D> dataType(Class<D> dataClass) {
       Builder<D> builder = new Builder<>();
       return builder.dimensions(dimensions).nodeSplitter(splitter);
+    }
+
+    public Builder<T> nodeComparator(NodeComparator comparator) {
+      this.nodeSelector.setNodeComparator(comparator);
+      return this;
     }
 
     public Builder<T> nodeFactory(NodeFactory factory) {

@@ -1,6 +1,12 @@
 package rtree;
 
-public class VolumeNodeComparator extends NodeComparator {
+public class VolumeIncreaseNodeComparator implements NodeComparator {
+
+  private Node nodeToInsert;
+
+  public void setNodeToInsert(Node nodeToInsert) {
+    this.nodeToInsert = nodeToInsert;
+  }
 
   @Override
   public int compare(Node o1, Node o2) {

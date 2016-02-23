@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 public class Benchmark {
 
-  private static final int DATA_SIZE = 100000;
+  private static final int DATA_SIZE = 10000;
 
   private final Map<SpatialKey, Double> data;
 
@@ -40,6 +40,7 @@ public class Benchmark {
     return RTree.builder()
         .dimensions(dimensions)
         .nodeSplitter(splitter)
+        .nodeComparator(new DistanceNodeComparator())
         .dataType(Double.class)
         .create();
   }

@@ -1,14 +1,25 @@
 package rtree;
 
+import com.google.common.collect.Sets;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@RunWith(Parameterized.class)
 public class SubNodeSelectorTest {
+
+  private final NodeComparator comparator;
+
+  public SubNodeSelectorTest(NodeComparator comparator) {
+    this.comparator = comparator;
+  }
 
   @Test
   public void testTrivialSelection() {
@@ -59,7 +70,11 @@ public class SubNodeSelectorTest {
   }
 
   private SubNodeSelector getSelector() {
-    return new MinimalMetricsSelector(new VolumeNodeComparator());
+    return new SubNodeSelector(comparator);
   }
 
+  @Parameterized.Parameters
+  public static Set<NodeComparator> comparators() {
+    return Sets.newHashSet(new VolumeIncreaseNodeComparator(), new DistanceNodeComparator());
+  }
 }
