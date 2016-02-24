@@ -4,7 +4,11 @@ import java.util.function.Consumer;
 
 public class Page {
 
-  private Object id;
+  private final PageFile pageFile;
+
+  public Page(PageFile pageFile) {
+    this.pageFile = pageFile;
+  }
 
   public <T> T getByHeader(String header) {
     return (T) header;
@@ -21,6 +25,14 @@ public class Page {
   }
 
   public Object getId() {
-    return id;
+    return null;
+  }
+
+  public boolean isHeaderPresent(String header) {
+    return false;
+  }
+
+  public void erase() {
+
   }
 }

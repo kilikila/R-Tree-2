@@ -5,6 +5,8 @@ import rtree.SpatialKey;
 
 public abstract class PersistentNode implements Node {
 
+  static final String HEADER_KEY = "key";
+
   protected final Page page;
 
   protected PersistentNode(Page page, SpatialKey key) {
@@ -14,11 +16,11 @@ public abstract class PersistentNode implements Node {
 
   @Override
   public SpatialKey spatialKey() {
-    return page.getByHeader("key");
+    return page.getByHeader(HEADER_KEY);
   }
 
   @Override
   public void spatialKey(SpatialKey key) {
-    page.writeByHeader("key", key);
+    page.writeByHeader(HEADER_KEY, key);
   }
 }

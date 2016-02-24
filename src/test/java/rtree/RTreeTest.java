@@ -24,10 +24,7 @@ public class RTreeTest extends DimensionalTest {
 
   @Before
   public void setUp() {
-    tree = RTree.builder()
-        .dimensions(dimensions)
-        .nodeSplitter(new LongestBoundSplitter(4, 10))
-        .dataType(SpatialKey.class)
+    tree = treeBuilder()
         .create();
     Map<SpatialKey, SpatialKey> data = generateSyntheticData(key -> key, DATA_SIZE, boundingBox);
     data.forEach(tree::insert);
@@ -61,6 +58,13 @@ public class RTreeTest extends DimensionalTest {
     return IntStream.range(0, dataSize)
         .mapToObj(i -> SpatialKeyTest.randomBox(boundingBox, 1.0))
         .collect(Collectors.toMap(key -> key, dataExtractor));
+  }
+
+  protected RTree.Builder<SpatialKey> treeBuilder() {
+    return RTree.builder()
+        .dimensions(dimensions)
+        .nodeSplitter(new LongestBoundSplitter(4, 10))
+        .dataType(SpatialKey.class);
   }
 
 }
