@@ -12,14 +12,14 @@ import java.util.function.Consumer;
 
 public class Page {
 
-  private final PageContentExtractor extractor;
+  private final PageContentAccessor accessor;
 
-  public Page(PageContentExtractor extractor) {
-    this.extractor = extractor;
+  public Page(PageContentAccessor accessor) {
+    this.accessor = accessor;
   }
 
   public <T> T getByHeader(String header) {
-    String content = extractor.getContent();
+    String content = accessor.getContent();
     return (T) new ContentParser(content).getHeaderContent(header);
   }
 
@@ -30,18 +30,25 @@ public class Page {
   }
 
   public void writeByHeader(String header, Object obj) {
-    String content = extractor.getContent();
+    String content = accessor.getContent();
     ContentParser contentParser = new ContentParser(content);
     contentParser.setHeaderContent(header, obj);
-    contentParser.getContentString();
+    String contentString = contentParser.getContentString();
+    accessor.setContent(contentString);
   }
 
   public boolean isHeaderPresent(String header) {
-    return false;
+    try {
+      String content = accessor.getContent();
+      new ContentParser(content).getHeaderContent(header);
+    } catch (IllegalStateException e) {
+      return false;
+    }
+    return true;
   }
 
   public void erase() {
-
+    accessor.eraseContent();
   }
 
   private class ContentParser {

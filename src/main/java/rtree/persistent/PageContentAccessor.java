@@ -1,8 +1,10 @@
 package rtree.persistent;
 
-public interface PageContentExtractor {
+public interface PageContentAccessor {
 
   String getContent();
 
   void setContent(String content);
+
+  void eraseContent();
 }
