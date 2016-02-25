@@ -1,17 +1,17 @@
 package rtree.persistent;
 
-public class PageFile {
+public class PageFile implements PageAccessor {
 
   public PageFile(String filename) {
 
   }
 
-  public Page getById(Object id) {
+  public Page getById(PageId id) {
     return null;
   }
 
-  public Page newPage() {
-    return new Page(this);
+  public PageId newPage() {
+    return null;
   }
 
   public static PageFile parse(String filename) {

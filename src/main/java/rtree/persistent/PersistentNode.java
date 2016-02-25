@@ -7,20 +7,27 @@ public abstract class PersistentNode implements Node {
 
   static final String HEADER_KEY = "key";
 
-  protected final Page page;
+  protected final PageAccessor pageAccessor;
 
-  protected PersistentNode(Page page, SpatialKey key) {
-    this.page = page;
+  protected final PageId id;
+
+  protected PersistentNode(PageId id, SpatialKey key, PageAccessor pageAccessor) {
+    this.id = id;
+    this.pageAccessor = pageAccessor;
     spatialKey(key);
   }
 
   @Override
   public SpatialKey spatialKey() {
-    return page.getByHeader(HEADER_KEY);
+    return page().getByHeader(HEADER_KEY);
+  }
+
+  protected Page page() {
+    return pageAccessor.getById(id);
   }
 
   @Override
   public void spatialKey(SpatialKey key) {
-    page.writeByHeader(HEADER_KEY, key);
+    page().writeByHeader(HEADER_KEY, key);
   }
 }

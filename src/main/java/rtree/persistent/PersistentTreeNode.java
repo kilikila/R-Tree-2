@@ -12,32 +12,27 @@ public class PersistentTreeNode extends PersistentNode implements TreeNode {
 
   static final String HEADER_SUB_NODES = "subNodes";
 
-  static final String headerNumOfSubNodes = "numOfSubs";
-
-  private final NodeRetriever nodeRetriever;
-
-  public PersistentTreeNode(Page page, SpatialKey key, NodeRetriever nodeRetriever) {
-    super(page, key);
-    this.nodeRetriever = nodeRetriever;
-    page.writeByHeader(HEADER_SUB_NODES, Sets.newHashSet());
+  public PersistentTreeNode(PageId id, SpatialKey key, PageAccessor pageAccessor) {
+    super(id, key, pageAccessor);
+    page().writeByHeader(HEADER_SUB_NODES, Sets.newHashSet());
   }
 
   @Override
   public Stream<Node> subNodes() {
-    Set<Object> ids = page.getByHeader(HEADER_SUB_NODES);
-    return ids.stream().map(nodeRetriever::getByPageId);
+    Set<PageId> ids = page().getByHeader(HEADER_SUB_NODES);
+    return ids.stream().map(this::node);
   }
 
   @Override
   public int numOfSubs() {
-    return page.getByHeader(headerNumOfSubNodes);
+    return page().<Set<PageId>>getByHeader(HEADER_SUB_NODES).size();
   }
 
   @Override
   public void addSubNode(Node subNode) {
     if (subNode instanceof PersistentNode) {
-      Object id = ((PersistentNode) subNode).page.getId();
-      page.<Set<Object>>modifyByHeader(HEADER_SUB_NODES, subNodes -> subNodes.add(id));
+      PersistentNode persistentNode = (PersistentNode) subNode;
+      persistentNode.page().<Set<PageId>>modifyByHeader(HEADER_SUB_NODES, subNodes -> subNodes.add(persistentNode.id));
     } else {
       throw new IllegalStateException("Sub node is not persistent");
     }
@@ -47,11 +42,23 @@ public class PersistentTreeNode extends PersistentNode implements TreeNode {
   public void removeSub(TreeNode subNode) {
     if (subNode instanceof PersistentNode) {
       PersistentNode persistentNode = (PersistentNode) subNode;
-      Object id = persistentNode.page.getId();
-      page.<Set<Object>>modifyByHeader(HEADER_SUB_NODES, subNodes -> subNodes.remove(id));
-      persistentNode.page.erase();
+      Page page = persistentNode.page();
+      page.<Set<Object>>modifyByHeader(HEADER_SUB_NODES, subNodes -> subNodes.remove(persistentNode.id));
+      page.erase();
     } else {
       throw new IllegalStateException("Sub node is not persistent");
     }
+  }
+
+  private PersistentNode node(PageId id) {
+    Page page = pageAccessor.getById(id);
+    SpatialKey spatialKey = page.getByHeader(PersistentNode.HEADER_KEY);
+    if (page.isHeaderPresent(PersistentTreeNode.HEADER_SUB_NODES)) {
+      return new PersistentTreeNode(id, spatialKey, pageAccessor);
+    } else if (page.isHeaderPresent(PersistentLeafNode.HEADER_DATA)) {
+      Object data = page.getByHeader(PersistentLeafNode.HEADER_DATA);
+      return new PersistentLeafNode<>(id, spatialKey, pageAccessor, data);
+    }
+    throw new IllegalStateException("Unknown node type");
   }
 }
