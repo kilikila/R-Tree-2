@@ -38,21 +38,21 @@ public class PageFile implements PageAccessor {
   }
 
   public PageId newPage() {
-    long pointer = getAvailablePagePointer();
-    PageId pageId = new PageId(pointer);
+    int pageIndex = getAvailablePageIndex();
+    PageId pageId = new PageId(pageIndex);
     allocatePage(pageId);
     return pageId;
   }
 
-  public long getAvailablePagePointer() {
+  public int getAvailablePageIndex() {
     Set<Integer> pages = pagesTable().stream().sorted().collect(Collectors.toSet());
     if (pages.size() == 0) {
-      return getPointerForPageIndex(0);
+      return 0;
     }
     Iterator<Integer> iterator = pages.iterator();
     int prev = iterator.next();
     if (prev != 0) {
-      return getPointerForPageIndex(0);
+      return 0;
     }
     while (iterator.hasNext()) {
       int curr = iterator.next();
@@ -61,15 +61,11 @@ public class PageFile implements PageAccessor {
       }
       prev = curr;
     }
-    return getPointerForPageIndex(prev + 1);
-  }
-
-  private long getPointerForPageIndex(int i) {
-    return PAGE_SIZE * (i + 1);
+    return prev + 1;
   }
 
   private Set<Integer> pagesTable() {
-    String content = new ContentAccessor(new PageId(0)).getContent();
+    String content = getPageTableAccessor().getContent();
     CollectionType type = TypeFactory.defaultInstance().constructCollectionType(HashSet.class, Integer.TYPE);
     try {
       return new ObjectMapper().readValue(content, type);
@@ -82,13 +78,17 @@ public class PageFile implements PageAccessor {
     writePagesTable(new HashSet<>());
   }
 
-  private void writePagesTable(HashSet<String> pagesTable) {
+  private void writePagesTable(Set<Integer> pagesTable) {
     try {
       String content = new ObjectMapper().writeValueAsString(pagesTable);
-      new ContentAccessor(new PageId(0)).setContent(content);
+      getPageTableAccessor().setContent(content);
     } catch (JsonProcessingException e) {
       throw new IllegalStateException("JsonProcessingException");
     }
+  }
+
+  private ContentAccessor getPageTableAccessor() {
+    return new ContentAccessor(new PageId(-1));
   }
 
   private class ContentAccessor implements PageContentAccessor {
@@ -102,7 +102,7 @@ public class PageFile implements PageAccessor {
     @Override
     public String getContent() {
       try {
-        file.seek(id.pointer());
+        file.seek(position(id.pageIndex()));
         byte[] buf = new byte[PAGE_SIZE];
         file.read(buf);
         return new String(buf);
@@ -114,7 +114,7 @@ public class PageFile implements PageAccessor {
     @Override
     public void setContent(String content) {
       try {
-        file.seek(id.pointer());
+        file.seek(position(id.pageIndex()));
         file.write(content.getBytes());
       } catch (IOException e) {
         throw new IllegalStateException("IOException");
@@ -130,7 +130,7 @@ public class PageFile implements PageAccessor {
   }
 
   private void allocatePage(PageId id) {
-    long pointer = id.pointer();
+    long pointer = position(id.pageIndex());
     try {
       file.seek(pointer);
     } catch (IOException e) {
@@ -149,9 +149,16 @@ public class PageFile implements PageAccessor {
     } catch (IOException e) {
       throw new IllegalStateException("IOException");
     }
+    Set<Integer> pagesTable = pagesTable();
+    pagesTable.add(id.pageIndex());
+    writePagesTable(pagesTable);
   }
 
   private void deallocatePage(PageId id) {
 
+  }
+
+  private long position(int pageIndex) {
+    return (pageIndex + 1) * PAGE_SIZE;
   }
 }

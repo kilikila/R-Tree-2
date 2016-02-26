@@ -22,7 +22,7 @@ public class PageFileTest {
   public void testGetById() {
     Set<PageId> ids = IntStream.range(0, 5)
         .mapToObj(i -> pageFile.newPage()).collect(Collectors.toSet());
-    int numOfPointers = (int) ids.stream().mapToLong(PageId::pointer).distinct().count();
+    int numOfPointers = (int) ids.stream().mapToLong(PageId::pageIndex).distinct().count();
     assertThat(numOfPointers).isEqualTo(ids.size());
     boolean headerPresent = ids.stream()
         .map(pageFile::getById)

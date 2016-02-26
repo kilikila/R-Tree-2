@@ -1,13 +1,13 @@
 package rtree.persistent;
 
 public class PageId {
-  private final long pointer;
+  private final int pageIndex;
 
-  public PageId(long pointer) {
-    this.pointer = pointer;
+  public PageId(int pageIndex) {
+    this.pageIndex = pageIndex;
   }
 
-  public long pointer() {
-    return pointer;
+  public int pageIndex() {
+    return pageIndex;
   }
 }

@@ -81,7 +81,7 @@ public class Page {
       try {
         new ObjectOutputStream(outputStream).writeObject(obj);
       } catch (IOException e) {
-        throw new IllegalStateException("Failed to serialize new header content");
+        throw new IllegalStateException("Failed to serialize new header content.  Header: " + header);
       }
       headers.put(header, outputStream.toString());
     }
