@@ -9,8 +9,8 @@ public class LongestBoundSplitter extends OverflowSplitter {
 
   private final Set<TreeNode> divisions = Sets.newHashSet();
 
-  public LongestBoundSplitter(int minSubNodes, int maxSubNodes) {
-    super(minSubNodes, maxSubNodes);
+  public LongestBoundSplitter(NodeFactory nodeFactory, int minSubNodes, int maxSubNodes) {
+    super(nodeFactory, minSubNodes, maxSubNodes);
   }
 
   public Set<TreeNode> divide(TreeNode node) {
@@ -38,7 +38,7 @@ public class LongestBoundSplitter extends OverflowSplitter {
 
   private void addDivision(Set<Node> nodes) {
     SpatialKey spatialKey = nodes.iterator().next().spatialKey();
-    TreeNode treeNode = new TreeNode.InMemory(spatialKey);
+    TreeNode treeNode = nodeFactory.treeNode(spatialKey);
     nodes.forEach(treeNode::addSubNode);
     divisions.add(treeNode);
   }

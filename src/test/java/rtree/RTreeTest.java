@@ -63,7 +63,6 @@ public class RTreeTest extends DimensionalTest {
   protected RTree.Builder<SpatialKey> treeBuilder() {
     return RTree.builder()
         .dimensions(dimensions)
-        .nodeSplitter(new LongestBoundSplitter(4, 10))
         .dataType(SpatialKey.class);
   }
 

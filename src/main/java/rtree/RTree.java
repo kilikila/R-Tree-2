@@ -1,6 +1,7 @@
 package rtree;
 
 import com.google.common.base.Preconditions;
+import rtree.persistent.PageFile;
 import rtree.persistent.PersistentNodeFactory;
 
 import java.util.HashSet;
@@ -65,8 +66,6 @@ public class RTree<T> {
 
     private int dimensions = 2;
 
-    private NodeSplitter splitter = new LongestBoundSplitter(4, 10);
-
     private SubNodeSelector nodeSelector = new SubNodeSelector(new VolumeIncreaseNodeComparator());
 
     public Builder<T> dimensions(int dimensions) {
@@ -77,7 +76,7 @@ public class RTree<T> {
 
     public <D> Builder<D> dataType(Class<D> dataClass) {
       Builder<D> builder = new Builder<>();
-      return builder.dimensions(dimensions).nodeSplitter(splitter);
+      return builder.dimensions(dimensions);
     }
 
     public Builder<T> nodeComparator(NodeComparator comparator) {
@@ -86,17 +85,12 @@ public class RTree<T> {
     }
 
     public Builder<T> persistent(String filename) {
-      this.factory = new PersistentNodeFactory(filename);
-      return this;
-    }
-
-    public Builder<T> nodeSplitter(NodeSplitter splitter) {
-      this.splitter = splitter;
+      this.factory = new PersistentNodeFactory(new PageFile(filename, 20000));
       return this;
     }
 
     public RTree<T> create() {
-      return new RTree<>(dimensions, splitter, nodeSelector, factory);
+      return new RTree<>(dimensions, new LongestBoundSplitter(factory, 4, 10), nodeSelector, factory);
     }
 
   }
@@ -160,7 +154,7 @@ public class RTree<T> {
     }
 
     private boolean subNodesAreLeaves(TreeNode node) {
-      return node.subNodes().iterator().next() instanceof LeafNode.InMemory;
+      return node.subNodes().iterator().next() instanceof LeafNode;
     }
 
   }

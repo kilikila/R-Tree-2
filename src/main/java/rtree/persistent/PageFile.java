@@ -16,9 +16,11 @@ import java.util.stream.Collectors;
 
 public class PageFile implements PageAccessor {
 
-  private static final int PAGE_SIZE = 10000;
+  private final int pageSize;
 
   private final RandomAccessFile file;
+
+  private final PageId table = new PageId(-1);;
 
   public PageFile(String filename) {
     try {
@@ -27,6 +29,17 @@ public class PageFile implements PageAccessor {
     } catch (FileNotFoundException e) {
       throw new IllegalStateException("File " + filename + " is unreachable");
     }
+    pageSize = 10240;
+  }
+
+  public PageFile(String filename, int pageSize) {
+    try {
+      file = new RandomAccessFile(filename, "rw");
+      initialise();
+    } catch (FileNotFoundException e) {
+      throw new IllegalStateException("File " + filename + " is unreachable");
+    }
+    this.pageSize = pageSize;
   }
 
   private void initialise() {
@@ -34,7 +47,11 @@ public class PageFile implements PageAccessor {
   }
 
   public Page getById(PageId id) {
-    return new Page(new ContentAccessor(id));
+    if (pagesTable().contains(id.pageIndex())) {
+      return new Page(new PageContentAccessor(id));
+    } else {
+      return null;
+    }
   }
 
   public PageId newPage() {
@@ -44,7 +61,7 @@ public class PageFile implements PageAccessor {
     return pageId;
   }
 
-  public int getAvailablePageIndex() {
+  private int getAvailablePageIndex() {
     Set<Integer> pages = pagesTable().stream().sorted().collect(Collectors.toSet());
     if (pages.size() == 0) {
       return 0;
@@ -87,23 +104,22 @@ public class PageFile implements PageAccessor {
     }
   }
 
-  private ContentAccessor getPageTableAccessor() {
-    return new ContentAccessor(new PageId(-1));
+  private PageContentAccessor getPageTableAccessor() {
+    return new PageContentAccessor(table);
   }
 
-  private class ContentAccessor implements PageContentAccessor {
+  class PageContentAccessor {
 
     private final PageId id;
 
-    public ContentAccessor(PageId id) {
+    public PageContentAccessor(PageId id) {
       this.id = id;
     }
 
-    @Override
     public String getContent() {
       try {
-        file.seek(position(id.pageIndex()));
-        byte[] buf = new byte[PAGE_SIZE];
+        file.seek(position(id));
+        byte[] buf = new byte[pageSize];
         file.read(buf);
         return new String(buf);
       } catch (IOException e) {
@@ -111,54 +127,51 @@ public class PageFile implements PageAccessor {
       }
     }
 
-    @Override
     public void setContent(String content) {
       try {
-        file.seek(position(id.pageIndex()));
+        file.seek(position(id));
         file.write(content.getBytes());
       } catch (IOException e) {
         throw new IllegalStateException("IOException");
       }
     }
 
-    @Override
     public void eraseContent() {
-      setContent(new String(new byte[PAGE_SIZE]));
+      setContent(new String(new byte[pageSize]));
       deallocatePage(id);
     }
 
   }
 
   private void allocatePage(PageId id) {
-    long pointer = position(id.pageIndex());
-    try {
-      file.seek(pointer);
-    } catch (IOException e) {
-      try {
-        file.setLength(file.length() + PAGE_SIZE);
-        file.seek(pointer);
-      } catch (IOException e1) {
-        throw new IllegalStateException("File is corrupted");
-      }
-    }
-    try {
-      byte[] bytes = new ObjectMapper().writeValueAsBytes(new HashMap<String, String>());
-      file.write(bytes);
-    } catch (JsonProcessingException e) {
-      throw new IllegalStateException("JsonProcessingException");
-    } catch (IOException e) {
-      throw new IllegalStateException("IOException");
-    }
+    long pointer = position(id);
+    setFilePointer(pointer);
+    new PageContentAccessor(id).eraseContent();
     Set<Integer> pagesTable = pagesTable();
     pagesTable.add(id.pageIndex());
     writePagesTable(pagesTable);
   }
 
-  private void deallocatePage(PageId id) {
-
+  private void setFilePointer(long pointer) {
+    try {
+      file.seek(pointer);
+    } catch (IOException e) {
+      try {
+        file.setLength(file.length() + pageSize);
+        file.seek(pointer);
+      } catch (IOException e1) {
+        throw new IllegalStateException("File is corrupted");
+      }
+    }
   }
 
-  private long position(int pageIndex) {
-    return (pageIndex + 1) * PAGE_SIZE;
+  private void deallocatePage(PageId id) {
+    Set<Integer> pagesTable = pagesTable();
+    pagesTable.remove(id.pageIndex());
+    writePagesTable(pagesTable);
+  }
+
+  private long position(PageId id) {
+    return (id.pageIndex() + 1) * pageSize;
   }
 }

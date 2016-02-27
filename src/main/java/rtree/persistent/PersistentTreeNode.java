@@ -32,7 +32,7 @@ public class PersistentTreeNode extends PersistentNode implements TreeNode {
   public void addSubNode(Node subNode) {
     if (subNode instanceof PersistentNode) {
       PersistentNode persistentNode = (PersistentNode) subNode;
-      persistentNode.page().<Set<PageId>>modifyByHeader(HEADER_SUB_NODES, subNodes -> subNodes.add(persistentNode.id));
+      page().<Set<PageId>>modifyByHeader(HEADER_SUB_NODES, subNodes -> subNodes.add(persistentNode.id));
     } else {
       throw new IllegalStateException("Sub node is not persistent");
     }
@@ -42,9 +42,8 @@ public class PersistentTreeNode extends PersistentNode implements TreeNode {
   public void removeSub(TreeNode subNode) {
     if (subNode instanceof PersistentNode) {
       PersistentNode persistentNode = (PersistentNode) subNode;
-      Page page = persistentNode.page();
-      page.<Set<Object>>modifyByHeader(HEADER_SUB_NODES, subNodes -> subNodes.remove(persistentNode.id));
-      page.erase();
+      page().<Set<Object>>modifyByHeader(HEADER_SUB_NODES, subNodes -> subNodes.remove(persistentNode.id));
+      persistentNode.page().erase();
     } else {
       throw new IllegalStateException("Sub node is not persistent");
     }

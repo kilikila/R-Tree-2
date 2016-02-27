@@ -2,17 +2,19 @@ package rtree;
 
 import com.google.common.base.Preconditions;
 
-import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 
 public abstract class OverflowSplitter implements NodeSplitter {
 
+  protected final NodeFactory nodeFactory;
+
   protected final int minSubNodes;
 
   protected final int maxSubNodes;
 
-  public OverflowSplitter(int minSubNodes, int maxSubNodes) {
+  public OverflowSplitter(NodeFactory nodeFactory, int minSubNodes, int maxSubNodes) {
+    this.nodeFactory = nodeFactory;
     Preconditions.checkArgument(minSubNodes > 0,
         "Minimal num of nodes must be positive. Got %s", minSubNodes);
     Preconditions.checkArgument(maxSubNodes > minSubNodes, "Max must be grater then min");

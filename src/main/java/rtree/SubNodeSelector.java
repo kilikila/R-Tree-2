@@ -25,7 +25,7 @@ public class SubNodeSelector {
       Node chosenSubNode = node.subNodes()
           .min(nodeComparator)
           .orElseThrow(IllegalStateException::new);
-      if (chosenSubNode instanceof TreeNode.InMemory) {
+      if (chosenSubNode instanceof TreeNode) {
         return (TreeNode) chosenSubNode;
       } else {
         throw new IllegalStateException("Incorrect node type");

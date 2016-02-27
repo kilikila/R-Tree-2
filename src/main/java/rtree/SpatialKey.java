@@ -2,12 +2,13 @@ package rtree;
 
 import com.google.common.base.Preconditions;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class SpatialKey {
+public class SpatialKey implements Serializable{
 
   private final List<Bound> bounds;
 
@@ -63,7 +64,7 @@ public class SpatialKey {
     return bounds.hashCode();
   }
 
-  public static class Bound {
+  public static class Bound implements Serializable{
 
     private final double min;
 

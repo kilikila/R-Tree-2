@@ -9,8 +9,8 @@ public class PersistentNodeFactory implements NodeFactory {
 
   private final PageFile pageFile;
 
-  public PersistentNodeFactory(String filename) {
-    this.pageFile = new PageFile(filename);
+  public PersistentNodeFactory(PageFile pageFile) {
+    this.pageFile = pageFile;
   }
 
   @Override

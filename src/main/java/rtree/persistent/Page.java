@@ -12,9 +12,9 @@ import java.util.function.Consumer;
 
 public class Page {
 
-  private final PageContentAccessor accessor;
+  private final PageFile.PageContentAccessor accessor;
 
-  public Page(PageContentAccessor accessor) {
+  public Page(PageFile.PageContentAccessor accessor) {
     this.accessor = accessor;
   }
 
@@ -38,13 +38,8 @@ public class Page {
   }
 
   public boolean isHeaderPresent(String header) {
-    try {
-      String content = accessor.getContent();
-      new ContentParser(content).getHeaderContent(header);
-    } catch (IllegalStateException e) {
-      return false;
-    }
-    return true;
+    String content = accessor.getContent();
+    return new ContentParser(content).isHeaderPresent(header);
   }
 
   public void erase() {
@@ -53,12 +48,14 @@ public class Page {
 
   private class ContentParser {
 
+    private final ObjectMapper mapper = new ObjectMapper();
+
     private Map<String, String> headers;
 
     public ContentParser(String content) {
       MapType headerMapType = TypeFactory.defaultInstance().constructMapType(HashMap.class, String.class, String.class);
       try {
-        headers = new ObjectMapper().readValue(content, headerMapType);
+        headers = mapper.readValue(content, headerMapType);
       } catch (IOException e) {
         headers = new HashMap<>();
       }
@@ -67,7 +64,7 @@ public class Page {
     public Object getHeaderContent(String header) {
       String headerContent = headers.get(header);
       if (headerContent == null) {
-        throw new IllegalStateException("Header not found");
+        throw new IllegalStateException("Header not found " + header);
       }
       try {
         return new ObjectInputStream(new ByteArrayInputStream(headerContent.getBytes())).readObject();
@@ -86,9 +83,13 @@ public class Page {
       headers.put(header, outputStream.toString());
     }
 
+    public boolean isHeaderPresent(String header) {
+      return headers.containsKey(header);
+    }
+
     public String getContentString() {
       try {
-        return new ObjectMapper().writeValueAsString(headers);
+        return mapper.writeValueAsString(headers);
       } catch (JsonProcessingException e) {
         throw new IllegalStateException("Failed to serialize headers");
       }

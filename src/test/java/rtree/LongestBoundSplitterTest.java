@@ -8,6 +8,6 @@ public class LongestBoundSplitterTest extends OverflowSplitterTest {
 
   @Override
   protected LongestBoundSplitter supplySplitter() {
-    return new LongestBoundSplitter(minSubNodes, maxSubNodes);
+    return new LongestBoundSplitter(NodeFactory.inMemory(), minSubNodes, maxSubNodes);
   }
 }

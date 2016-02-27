@@ -1,6 +1,9 @@
 package rtree.persistent;
 
-public class PageId {
+import java.io.Serializable;
+
+public class PageId implements Serializable{
+
   private final int pageIndex;
 
   public PageId(int pageIndex) {
@@ -10,4 +13,5 @@ public class PageId {
   public int pageIndex() {
     return pageIndex;
   }
+  
 }

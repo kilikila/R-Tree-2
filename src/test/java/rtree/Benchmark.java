@@ -24,10 +24,7 @@ public class Benchmark {
       .create();
 
   public static void main(String[] args) {
-    new Benchmark(
-        new BenchmarkSetup("with splitter 4, 10", new LongestBoundSplitter(4, 10)),
-        new BenchmarkSetup("with splitter 40, 100", new LongestBoundSplitter(40, 100)),
-        new BenchmarkSetup("with splitter 400, 1000", new LongestBoundSplitter(400, 1000))).run();
+    new Benchmark().run();
   }
 
   public Benchmark(BenchmarkSetup... setups) {
@@ -36,10 +33,9 @@ public class Benchmark {
     data = RTreeTest.generateSyntheticData(SpatialKey::volume, DATA_SIZE, boundingBox);
   }
 
-  private RTree<Double> constructTree(NodeSplitter splitter) {
+  private RTree<Double> constructTree() {
     return RTree.builder()
         .dimensions(dimensions)
-        .nodeSplitter(splitter)
         .nodeComparator(new DistanceNodeComparator())
         .dataType(Double.class)
         .create();
@@ -49,7 +45,7 @@ public class Benchmark {
     for (int i = 0; i < 3; i++) {
       rawSearch();
       setups.stream().forEach((setup) ->
-          testAndLog(setup.setupTitle, constructTree(setup.splitter)));
+          testAndLog(setup.setupTitle, constructTree()));
     }
   }
 
