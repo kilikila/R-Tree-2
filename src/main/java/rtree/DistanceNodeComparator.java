@@ -27,8 +27,7 @@ public class DistanceNodeComparator implements NodeComparator {
 
   private List<Double> center(Node nodeToInsert) {
     SpatialKey key = nodeToInsert.spatialKey();
-    return IntStream.range(0, key.dimensions())
-        .mapToObj(key::bound)
+    return key.bounds()
         .map(this::boundCenter)
         .collect(Collectors.toList());
   }

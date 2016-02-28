@@ -3,25 +3,23 @@ package rtree;
 import com.google.common.base.Preconditions;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class SpatialKey implements Serializable{
 
   private final List<Bound> bounds;
 
-  SpatialKey(final List<Bound> bounds) {
+  public SpatialKey(final List<Bound> bounds) {
     this.bounds = bounds;
   }
 
-  Bound bound(int dimension) {
+  private Bound bound(int dimension) {
     return bounds.get(dimension);
-  }
-
-  Bound bound(int dimension, double min, double max) {
-    return bounds.set(dimension, new Bound(min, max));
   }
 
   public int dimensions() {
@@ -43,6 +41,12 @@ public class SpatialKey implements Serializable{
     return new SpatialKey(bounds);
   }
 
+  public static SpatialKey union(Collection<SpatialKey> keys) {
+    return keys.stream()
+        .collect(Collectors.reducing(SpatialKey::union))
+        .get();
+  }
+
   public double volume() {
     Optional<Double> volume = bounds.stream().map(Bound::length).collect(Collectors.reducing((l1, l2) -> l1 * l2));
     return volume.get();
@@ -62,6 +66,10 @@ public class SpatialKey implements Serializable{
   @Override
   public int hashCode() {
     return bounds.hashCode();
+  }
+
+  public Stream<Bound> bounds() {
+    return bounds.stream();
   }
 
   public static class Bound implements Serializable{
@@ -124,7 +132,7 @@ public class SpatialKey implements Serializable{
 
   public static class Builder {
 
-    private final SpatialKey key;
+    private SpatialKey key;
 
     public Builder(int dimensions) {
       List<Bound> bounds = IntStream.range(0, dimensions)
@@ -136,7 +144,10 @@ public class SpatialKey implements Serializable{
     public Builder setBound(int dimension, double min, double max) {
       checkDimensionSupported(dimension);
       checkMinMax(min, max);
-      key.bound(dimension, min, max);
+      List<Bound> bounds = key.bounds;
+      bounds.remove(dimension);
+      bounds.add(dimension, new Bound(min, max));
+      key = new SpatialKey(bounds);
       return this;
     }
 

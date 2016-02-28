@@ -90,7 +90,7 @@ public class RTree<T> {
     }
 
     public RTree<T> create() {
-      return new RTree<>(dimensions, new LongestBoundSplitter(factory, 4, 10), nodeSelector, factory);
+      return new RTree<>(dimensions, new UniformSplitter(4, 10), nodeSelector, factory);
     }
 
   }

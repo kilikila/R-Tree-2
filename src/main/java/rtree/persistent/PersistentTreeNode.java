@@ -20,7 +20,7 @@ public class PersistentTreeNode extends PersistentNode implements TreeNode {
   @Override
   public Stream<Node> subNodes() {
     Set<PageId> ids = page().getByHeader(HEADER_SUB_NODES);
-    return ids.stream().map(this::node);
+    return ids.stream().map(this::toNode);
   }
 
   @Override
@@ -49,7 +49,7 @@ public class PersistentTreeNode extends PersistentNode implements TreeNode {
     }
   }
 
-  private PersistentNode node(PageId id) {
+  private PersistentNode toNode(PageId id) {
     Page page = pageAccessor.getById(id);
     SpatialKey spatialKey = page.getByHeader(PersistentNode.HEADER_KEY);
     if (page.isHeaderPresent(PersistentTreeNode.HEADER_SUB_NODES)) {

@@ -56,8 +56,7 @@ public class SubNodeSelectorTest {
   }
 
   private SpatialKey inside(SpatialKey key) {
-    List<SpatialKey.Bound> bounds = IntStream.range(0, key.dimensions())
-        .mapToObj(key::bound)
+    List<SpatialKey.Bound> bounds = key.bounds()
         .map(this::boundCenter)
         .collect(Collectors.toList());
     return new SpatialKey(bounds);

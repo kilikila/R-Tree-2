@@ -6,5 +6,5 @@ import java.util.Set;
 @FunctionalInterface
 public interface NodeSplitter {
 
-  Optional<Set<TreeNode>> split(TreeNode node);
+  Optional<Set<SpatialKey>> split(TreeNode node);
 }

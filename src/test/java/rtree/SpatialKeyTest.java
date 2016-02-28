@@ -37,8 +37,7 @@ public class SpatialKeyTest extends DimensionalTest {
   }
 
   public static SpatialKey randomBox(SpatialKey boundingBox, double maxBoundLength) {
-    List<SpatialKey.Bound> bounds = IntStream.range(0, boundingBox.dimensions())
-        .mapToObj(boundingBox::bound)
+    List<SpatialKey.Bound> bounds = boundingBox.bounds()
         .map(bound -> randomBound(bound.min(), bound.max(), maxBoundLength))
         .collect(Collectors.toList());
     return new SpatialKey(bounds);
