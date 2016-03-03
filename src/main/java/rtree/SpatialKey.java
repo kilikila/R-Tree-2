@@ -18,7 +18,7 @@ public class SpatialKey implements Serializable{
     this.bounds = bounds;
   }
 
-  private Bound bound(int dimension) {
+  public Bound bound(int dimension) {
     return bounds.get(dimension);
   }
 

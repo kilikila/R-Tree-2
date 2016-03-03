@@ -1,10 +1,9 @@
 package rtree;
 
-import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -50,17 +49,30 @@ public class UniformSplitter extends OverflowSplitter {
 
       Set<SpatialKey> combine = Sets.newHashSet();
 
-      private final List<Set<SpatialKey.Bound>> bounds;
+      private final List<Set<SpatialKey.Bound>> boundsByDim;
 
-      public BoundsCombiner(List<Set<SpatialKey.Bound>> bounds) {
-        this.bounds = bounds;
+      public BoundsCombiner(List<Set<SpatialKey.Bound>> boundsByDim) {
+        this.boundsByDim = boundsByDim;
       }
 
       public Set<SpatialKey> combine() {
-        ImmutableMultimap.Builder<Integer, SpatialKey.Bound> builder = ImmutableMultimap.builder();
-        IntStream.range(0, bounds.size())
-            .forEach(i -> builder.putAll(i, bounds.get(i)));
+        recursivelyAdd(new ArrayList<>());
         return combine;
+      }
+
+      private void recursivelyAdd(List<SpatialKey.Bound> bounds) {
+        if (bounds.size() == boundsByDim.size()) {
+          combine.add(new SpatialKey(bounds));
+          return;
+        } else {
+          boundsByDim.get(bounds.size()).forEach(bound -> addAndProceed(bounds, bound));
+        }
+      }
+
+      private void addAndProceed(List<SpatialKey.Bound> bounds, SpatialKey.Bound bound) {
+        List<SpatialKey.Bound> copy = Lists.newArrayList(bounds);
+        copy.add(bound);
+        recursivelyAdd(copy);
       }
     }
   }
