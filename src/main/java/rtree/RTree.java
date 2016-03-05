@@ -4,8 +4,8 @@ import com.google.common.base.Preconditions;
 import rtree.factories.DivisionPerformerFactory;
 import rtree.factories.NodeComparatorFactory;
 import rtree.factories.NodeFactory;
-import rtree.persistent.PageFile;
-import rtree.persistent.PersistentNodeFactory;
+import rtree.implementations.UniformDivisionPerformer;
+import rtree.implementations.VolumeIncreaseNodeComparator;
 
 import java.util.Comparator;
 import java.util.HashSet;
@@ -93,11 +93,18 @@ public class RTree<T> {
       if (subNodesAreLeaves(node)) {
         node.addSubNode(leafNode);
       } else {
-        TreeNode subNode = chooseSubNode(node, leafNode);
+        Set<TreeNode> subNodes = castSubsToTreeNodes(node);
+        TreeNode subNode = chooseNode(subNodes, leafNode);
         Optional<Set<TreeNode>> split = insertToSubNode(subNode);
         split.ifPresent(nodes -> replaceWithNodes(node, subNode, nodes));
       }
       return splitIfNecessaryAndUpdateKey(node);
+    }
+
+    private Set<TreeNode> castSubsToTreeNodes(TreeNode node) {
+      return node.subNodes()
+                .map(subNode -> (TreeNode) subNode)
+                .collect(Collectors.toSet());
     }
 
     private void replaceWithNodes(TreeNode node, TreeNode subNode, Set<TreeNode> newNodes) {
@@ -117,24 +124,27 @@ public class RTree<T> {
     }
 
     private Set<TreeNode> newNodes(Set<SpatialKey> keys, TreeNode node) {
-      Set<TreeNode> nodes = keys.stream()
+      Set<TreeNode> newNodes = keys.stream()
           .map(nodeFactory::treeNode)
           .collect(Collectors.toSet());
-      node.subNodes()
-          .map(subNode -> nodeComparatorFactory.supplyComparator(subNode));
-      return nodes;
+      node.subNodes().forEach(subNode -> chooseAndAdd(newNodes, subNode));
+      return nonEmpty(newNodes);
     }
 
-    private TreeNode chooseSubNode(TreeNode node, Node nodeToInsert) {
+    private Set<TreeNode> nonEmpty(Set<TreeNode> newNodes) {
+      return newNodes.stream().filter(newNode -> newNode.numOfSubs() > 0).collect(Collectors.toSet());
+    }
+
+    private void chooseAndAdd(Set<TreeNode> nodes, Node subNode) {
+      chooseNode(nodes, subNode).addSubNode(subNode);
+    }
+
+    private TreeNode chooseNode(Set<TreeNode> nodes, Node nodeToInsert) {
       Comparator<Node> nodeComparator = nodeComparatorFactory.supplyComparator(nodeToInsert);
-      Node chosenSubNode = node.subNodes()
+      Node chosenSubNode = nodes.stream()
           .min(nodeComparator)
           .orElseThrow(() -> new IllegalStateException("Cannot choose sub node"));
-      if (chosenSubNode instanceof TreeNode) {
-        return (TreeNode) chosenSubNode;
-      } else {
-        throw new IllegalStateException("Incorrect node type");
-      }
+      return (TreeNode) chosenSubNode;
     }
 
     private void makeNewRoot(Set<TreeNode> nodes) {
@@ -212,17 +222,17 @@ public class RTree<T> {
 
   public static class Builder<T> {
 
-    private int dimensions = 2;
+    protected int dimensions = 2;
 
-    private int minSubNodes = 4;
+    protected int minSubNodes = 4;
 
-    private int maxSubNodes = 10;
+    protected int maxSubNodes = 10;
 
-    private NodeFactory nodeFactory = NodeFactory.inMemory();
+    protected NodeFactory nodeFactory = NodeFactory.inMemory();
 
-    private DivisionPerformerFactory divisionPerformerFactory;
+    protected DivisionPerformerFactory divisionPerformerFactory = UniformDivisionPerformer::new;
 
-    private NodeComparatorFactory nodeComparatorFactory;
+    protected NodeComparatorFactory nodeComparatorFactory = VolumeIncreaseNodeComparator::new;
 
     public Builder<T> dimensions(int dimensions) {
       Preconditions.checkArgument(dimensions > 0, "Dimensions must be positive, you set %s", dimensions);
@@ -248,8 +258,7 @@ public class RTree<T> {
     }
 
     public <D> Builder<D> dataType(Class<D> dataClass) {
-      Builder<D> builder = new Builder<>();
-      return builder.dimensions(dimensions);
+      return (Builder<D>) this;
     }
 
     public RTree<T> create() {

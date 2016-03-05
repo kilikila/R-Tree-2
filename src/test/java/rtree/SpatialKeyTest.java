@@ -1,5 +1,6 @@
 package rtree;
 
+import org.assertj.core.util.Lists;
 import org.junit.Test;
 
 import java.util.List;
@@ -16,11 +17,35 @@ public class SpatialKeyTest extends DimensionalTest {
 
   @Test
   public void testNew() {
-    SpatialKey randomBox = randomBox(cube(10, dimensions), 1.0);
+    SpatialKey randomBox = randomBox(zeroCentredCube(10, dimensions), 1.0);
     assertThat(randomBox.dimensions()).isEqualTo(dimensions);
   }
 
-  public static SpatialKey cube(double side, int dimensions) {
+  @Test
+  public void testUnion() {
+    SpatialKey cube1 = cube(2, 4);
+    SpatialKey cube2 = cube(0, 2);
+    SpatialKey cube3 = cube(-2, 0);
+    SpatialKey cube4 = cube(-4, -2);
+
+    SpatialKey unionAll = SpatialKey.union(Lists.newArrayList(cube1, cube2, cube3, cube4));
+    assertThat(unionAll).isEqualTo(zeroCentredCube(8, dimensions));
+
+    SpatialKey unionFirstTwo = SpatialKey.union(Lists.newArrayList(cube1, cube2));
+    assertThat(unionFirstTwo).isEqualTo(cube(-4, 0));
+
+    SpatialKey unionLastTwo = SpatialKey.union(Lists.newArrayList(cube3, cube4));
+    assertThat(unionLastTwo).isEqualTo(cube(0, 4));
+  }
+
+  private SpatialKey cube(double min, double max) {
+    SpatialKey.Builder builder = SpatialKey.builder(dimensions);
+    IntStream.range(0, dimensions)
+        .forEach(i -> builder.setBound(i, min, max));
+    return builder.create();
+  }
+
+  public static SpatialKey zeroCentredCube(double side, int dimensions) {
     double halfSide = side / 2;
     List<SpatialKey.Bound> bounds = IntStream.range(0, dimensions)
         .mapToObj(i -> new SpatialKey.Bound(-halfSide, halfSide))

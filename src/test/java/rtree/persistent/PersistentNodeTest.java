@@ -10,7 +10,7 @@ public abstract class PersistentNodeTest {
 
   @Test
   public void testSpatialKey() {
-    SpatialKey cube = SpatialKeyTest.cube(10, 3);
+    SpatialKey cube = SpatialKeyTest.zeroCentredCube(10, 3);
     PersistentNode node = supplyPersistentNode(cube);
     SpatialKey spatialKey = node.spatialKey();
     assertThat(spatialKey).isEqualTo(cube);

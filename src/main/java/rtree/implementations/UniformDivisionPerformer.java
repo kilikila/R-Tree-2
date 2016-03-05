@@ -15,27 +15,46 @@ public class UniformDivisionPerformer implements DivisionPerformer {
 
   private final SpatialKey boundingKey;
 
+  private double penaltySplits = 0;
+
   public UniformDivisionPerformer(Set<SpatialKey> subKeys) {
     boundingKey = SpatialKey.union(subKeys);
   }
 
-  public Set<SpatialKey> divide(double divisionCount) {
-    double splitsPerDim = Math.pow(divisionCount, boundingKey.dimensions());
+  public Set<SpatialKey> divide(int divisionCount) {
+    double splitsPerDim = Math.pow(divisionCount, 1.0 / boundingKey.dimensions());
     double averageBoundLength = boundingKey.bounds()
         .mapToDouble(SpatialKey.Bound::length)
         .average().getAsDouble();
     List<Set<SpatialKey.Bound>> newBounds = boundingKey.bounds()
-        .map(bound -> splitBound(bound, splitsPerDim, averageBoundLength))
+        .map(bound -> splitBound(bound, getSplitCount(bound, splitsPerDim, averageBoundLength)))
         .collect(Collectors.toList());
     return new BoundsCombiner(newBounds).combine();
   }
 
-  private Set<SpatialKey.Bound> splitBound(SpatialKey.Bound bound, double splitsPerDim, double averageBoundLength) {
-    double length = bound.length();
-    int splitCount = (int) Math.round(splitsPerDim * length / averageBoundLength);
-    double splitLength = length / splitCount;
+  private int getSplitCount(SpatialKey.Bound bound, double splitsPerDim, double averageBoundLength) {
+    double actualSplits = splitsPerDim * bound.length() / averageBoundLength;
+    if (isInteger(actualSplits) || isInteger(splitsPerDim)) {
+      return (int) Math.round(actualSplits);
+    } else {
+      if (penaltySplits >= 0) {
+        penaltySplits -= actualSplits - (int) actualSplits;
+        return (int) actualSplits;
+      } else {
+        penaltySplits += actualSplits - (int) actualSplits;
+        return (int) actualSplits + 1;
+      }
+    }
+  }
+
+  private boolean isInteger(double val) {
+    return val == Math.round(val);
+  }
+
+  private Set<SpatialKey.Bound> splitBound(SpatialKey.Bound bound, int splitCount) {
+    double splitLength = bound.length() / splitCount;
     return IntStream.range(0, splitCount)
-        .mapToObj(i -> new SpatialKey.Bound(bound.min() + splitLength * i, splitLength * (i + 1)))
+        .mapToObj(i -> new SpatialKey.Bound(bound.min() + splitLength * i, bound.min() + splitLength * (i + 1)))
         .collect(Collectors.toSet());
   }
 
@@ -57,7 +76,6 @@ public class UniformDivisionPerformer implements DivisionPerformer {
     private void recursivelyAdd(List<SpatialKey.Bound> bounds) {
       if (bounds.size() == boundsByDim.size()) {
         combine.add(new SpatialKey(bounds));
-        return;
       } else {
         boundsByDim.get(bounds.size()).forEach(bound -> addAndProceed(bounds, bound));
       }

@@ -2,8 +2,6 @@ package rtree;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
-import rtree.factories.DivisionPerformerFactory;
-import rtree.implementations.DistanceNodeComparator;
 import rtree.implementations.UniformDivisionPerformer;
 import rtree.implementations.VolumeIncreaseNodeComparator;
 
@@ -33,7 +31,7 @@ public class Benchmark {
 
   public Benchmark(BenchmarkSetup... setups) {
     this.setups = Lists.newArrayList(setups);
-    SpatialKey boundingBox = SpatialKeyTest.cube(20, dimensions);
+    SpatialKey boundingBox = SpatialKeyTest.zeroCentredCube(20, dimensions);
     data = RTreeTest.generateSyntheticData(SpatialKey::volume, DATA_SIZE, boundingBox);
   }
 

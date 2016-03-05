@@ -12,6 +12,8 @@ public class PersistentRTreeTest extends RTreeTest {
 
   @Override
   protected RTree.Builder<SpatialKey> treeBuilder() {
-    return super.treeBuilder().persistent("test-page-file.txt");
+    return PersistentRTree.builder(new PageFile("test-page-file.txt", 20000))
+        .dimensions(dimensions)
+        .dataType(SpatialKey.class);
   }
 }

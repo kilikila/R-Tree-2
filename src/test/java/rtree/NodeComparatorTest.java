@@ -4,7 +4,7 @@ import com.google.common.collect.Sets;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import rtree.implementations.DistanceNodeComparator;
+import rtree.factories.NodeComparatorFactory;
 import rtree.implementations.VolumeIncreaseNodeComparator;
 
 import java.util.Comparator;
@@ -15,12 +15,12 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(Parameterized.class)
-public class SubNodeSelectorTest {
+public class NodeComparatorTest {
 
-  private final Comparator<Node> comparator;
+  private final NodeComparatorFactory comparatorFactory;
 
-  public SubNodeSelectorTest(Comparator<Node> comparator) {
-    this.comparator = comparator;
+  public NodeComparatorTest(NodeComparatorFactory comparatorFactory) {
+    this.comparatorFactory = comparatorFactory;
   }
 
   @Test
@@ -38,7 +38,10 @@ public class SubNodeSelectorTest {
     node.addSubNode(new TreeNode.InMemory(cube4));
     node.addSubNode(new TreeNode.InMemory(cube5));
     LeafNode<Object> leafNode = new LeafNode.InMemory<>(inside(cube4), new Object());
-    TreeNode chosen = getSelector().chooseSubNode(node, leafNode);
+    Comparator<Node> nodeComparator = comparatorFactory.supplyComparator(leafNode);
+    Node chosen = node.subNodes()
+        .min(nodeComparator)
+        .get();
     assertThat(chosen.spatialKey()).isEqualTo(cube4);
   }
 
@@ -53,7 +56,10 @@ public class SubNodeSelectorTest {
     node.addSubNode(node1);
     node.addSubNode(node2);
     LeafNode<Object> leafNode = new LeafNode.InMemory<>(SpatialKeyTest.cube(1, 10, 1), new Object());
-    TreeNode chosen = getSelector().chooseSubNode(node, leafNode);
+    Comparator<Node> nodeComparator = comparatorFactory.supplyComparator(leafNode);
+    Node chosen = node.subNodes()
+        .min(nodeComparator)
+        .get();
     assertThat(chosen).isEqualTo(node1);
   }
 
@@ -70,12 +76,8 @@ public class SubNodeSelectorTest {
     return new SpatialKey.Bound(center - length / 10, center + length / 10);
   }
 
-  private SubNodeSelector getSelector() {
-    return new SubNodeSelector(factory);
-  }
-
   @Parameterized.Parameters
-  public static Set<Comparator<Node>> comparators() {
-    return Sets.newHashSet(new VolumeIncreaseNodeComparator(), new DistanceNodeComparator(center));
+  public static Set<NodeComparatorFactory> comparatorFactories() {
+    return Sets.newHashSet(VolumeIncreaseNodeComparator::new);
   }
 }

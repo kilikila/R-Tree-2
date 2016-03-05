@@ -6,15 +6,23 @@ import rtree.TreeNode;
 
 public interface NodeFactory {
 
-  default TreeNode treeNode(SpatialKey key) {
-    return new TreeNode.InMemory(key);
-  }
+  TreeNode treeNode(SpatialKey key);
 
-  default <T> LeafNode<T> leaf(SpatialKey key, T data) {
-    return new LeafNode.InMemory<>(key, data);
-  }
+  <T> LeafNode<T> leaf(SpatialKey key, T data);
 
   static NodeFactory inMemory() {
-    return new NodeFactory() {};
+    return new InMemoryNodeFactory();
+  }
+
+  class InMemoryNodeFactory implements NodeFactory {
+    @Override
+    public TreeNode treeNode(SpatialKey key) {
+      return new TreeNode.InMemory(key);
+    }
+
+    @Override
+    public <T> LeafNode<T> leaf(SpatialKey key, T data) {
+      return new LeafNode.InMemory<>(key, data);
+    }
   }
 }

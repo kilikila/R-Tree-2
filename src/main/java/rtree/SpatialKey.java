@@ -111,7 +111,6 @@ public class SpatialKey implements Serializable{
       if (o == null || getClass() != o.getClass()) return false;
       Bound bound = (Bound) o;
       return Double.compare(bound.min, min) == 0 && Double.compare(bound.max, max) == 0;
-
     }
 
     @Override
