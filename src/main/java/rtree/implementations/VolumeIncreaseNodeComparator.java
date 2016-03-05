@@ -1,10 +1,14 @@
-package rtree;
+package rtree.implementations;
 
-public class VolumeIncreaseNodeComparator implements NodeComparator {
+import rtree.Node;
 
-  private Node nodeToInsert;
+import java.util.Comparator;
 
-  public void setNodeToInsert(Node nodeToInsert) {
+public class VolumeIncreaseNodeComparator implements Comparator<Node> {
+
+  private final Node nodeToInsert;
+
+  public VolumeIncreaseNodeComparator(Node nodeToInsert) {
     this.nodeToInsert = nodeToInsert;
   }
 

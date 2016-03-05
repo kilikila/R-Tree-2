@@ -1,16 +1,19 @@
-package rtree;
+package rtree.implementations;
 
+import rtree.Node;
+import rtree.SpatialKey;
+
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class DistanceNodeComparator implements NodeComparator {
+public class DistanceNodeComparator implements Comparator<Node> {
 
-  private List<Double> center;
+  private final List<Double> center;
 
-  @Override
-  public void setNodeToInsert(Node nodeToInsert) {
-    center = center(nodeToInsert);
+  public DistanceNodeComparator(List<Double> center) {
+    this.center = center;
   }
 
   @Override

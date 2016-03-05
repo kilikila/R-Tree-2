@@ -26,7 +26,7 @@ public abstract class OverflowSplitterTest extends SplitterTest {
   }
 
   @Override
-  protected abstract OverflowSplitter supplySplitter();
+  protected abstract RTree.NodeSplitter supplySplitter();
 
   @Override
   protected void addSubNodesEnoughToSplit(TreeNode nodeToSplit) {

@@ -32,7 +32,7 @@ public abstract class SplitterTest extends DimensionalTest{
 
   private Set<TreeNode> performSplitAndTest(TreeNode nodeToSplit) {
     addSubNodesEnoughToSplit(nodeToSplit);
-    NodeSplitter splitter = supplySplitter();
+    RTree.NodeSplitter splitter = supplySplitter();
     Optional<Set<TreeNode>> split = splitter.split(nodeToSplit);
     assertThat(split.isPresent()).isTrue();
     Set<TreeNode> newNodes = split.get();
@@ -49,7 +49,7 @@ public abstract class SplitterTest extends DimensionalTest{
     return newNodes.stream().mapToInt(TreeNode::numOfSubs).sum();
   }
 
-  protected abstract NodeSplitter supplySplitter();
+  protected abstract RTree.NodeSplitter supplySplitter();
 
   protected abstract void addSubNodesEnoughToSplit(TreeNode nodeToSplit);
 }

@@ -1,4 +1,8 @@
-package rtree;
+package rtree.factories;
+
+import rtree.LeafNode;
+import rtree.SpatialKey;
+import rtree.TreeNode;
 
 public interface NodeFactory {
 

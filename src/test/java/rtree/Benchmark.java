@@ -2,6 +2,10 @@ package rtree;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
+import rtree.factories.DivisionPerformerFactory;
+import rtree.implementations.DistanceNodeComparator;
+import rtree.implementations.UniformDivisionPerformer;
+import rtree.implementations.VolumeIncreaseNodeComparator;
 
 import java.util.List;
 import java.util.Map;
@@ -36,7 +40,8 @@ public class Benchmark {
   private RTree<Double> constructTree() {
     return RTree.builder()
         .dimensions(dimensions)
-        .nodeComparator(new DistanceNodeComparator())
+        .divisionPerformerFactory(UniformDivisionPerformer::new)
+        .nodeComparatorFactory(VolumeIncreaseNodeComparator::new)
         .dataType(Double.class)
         .create();
   }
@@ -82,11 +87,8 @@ public class Benchmark {
 
     private final String setupTitle;
 
-    private final NodeSplitter splitter;
-
-    private BenchmarkSetup(String setupTitle, NodeSplitter splitter) {
+    private BenchmarkSetup(String setupTitle) {
       this.setupTitle = setupTitle;
-      this.splitter = splitter;
     }
   }
 }

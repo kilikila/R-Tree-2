@@ -4,20 +4,22 @@ import com.google.common.collect.Sets;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import rtree.implementations.DistanceNodeComparator;
+import rtree.implementations.VolumeIncreaseNodeComparator;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(Parameterized.class)
 public class SubNodeSelectorTest {
 
-  private final NodeComparator comparator;
+  private final Comparator<Node> comparator;
 
-  public SubNodeSelectorTest(NodeComparator comparator) {
+  public SubNodeSelectorTest(Comparator<Node> comparator) {
     this.comparator = comparator;
   }
 
@@ -69,11 +71,11 @@ public class SubNodeSelectorTest {
   }
 
   private SubNodeSelector getSelector() {
-    return new SubNodeSelector(comparator);
+    return new SubNodeSelector(factory);
   }
 
   @Parameterized.Parameters
-  public static Set<NodeComparator> comparators() {
-    return Sets.newHashSet(new VolumeIncreaseNodeComparator(), new DistanceNodeComparator());
+  public static Set<Comparator<Node>> comparators() {
+    return Sets.newHashSet(new VolumeIncreaseNodeComparator(), new DistanceNodeComparator(center));
   }
 }

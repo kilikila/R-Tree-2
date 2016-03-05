@@ -1,7 +1,7 @@
 package rtree.persistent;
 
 import rtree.LeafNode;
-import rtree.NodeFactory;
+import rtree.factories.NodeFactory;
 import rtree.SpatialKey;
 import rtree.TreeNode;
 
