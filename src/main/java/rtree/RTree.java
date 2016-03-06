@@ -3,10 +3,10 @@ package rtree;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import rtree.factories.DivisionPerformerFactory;
+import rtree.factories.DividerFactory;
 import rtree.factories.NodeComparatorFactory;
 import rtree.factories.NodeFactory;
-import rtree.implementations.UniformDivisionPerformer;
+import rtree.implementations.UniformDivider;
 import rtree.implementations.VolumeIncreaseNodeComparator;
 
 import java.util.*;
@@ -15,31 +15,31 @@ import java.util.stream.Collectors;
 
 public class RTree<T> {
 
-  private final int dimensions;
+  protected final int dimensions;
 
-  private final int minSubNodes;
+  protected final int minSubNodes;
 
-  private final int maxSubNodes;
+  protected final int maxSubNodes;
 
-  private final NodeFactory nodeFactory;
+  protected final NodeFactory nodeFactory;
 
-  private final DivisionPerformerFactory divisionPerformerFactory;
+  protected final DividerFactory dividerFactory;
 
-  private final NodeComparatorFactory nodeComparatorFactory;
+  protected final NodeComparatorFactory nodeComparatorFactory;
 
-  private TreeNode rootNode = null;
+  protected TreeNode rootNode = null;
 
   public RTree(int dimensions,
                int minSubNodes,
                int maxSubNodes,
                NodeFactory nodeFactory,
-               DivisionPerformerFactory divisionPerformerFactory,
+               DividerFactory dividerFactory,
                NodeComparatorFactory nodeComparatorFactory) {
     this.dimensions = dimensions;
     this.minSubNodes = minSubNodes;
     this.maxSubNodes = maxSubNodes;
     this.nodeFactory = nodeFactory;
-    this.divisionPerformerFactory = divisionPerformerFactory;
+    this.dividerFactory = dividerFactory;
     this.nodeComparatorFactory = nodeComparatorFactory;
   }
 
@@ -158,7 +158,7 @@ public class RTree<T> {
       }
 
       protected Set<TreeNode> divide(TreeNode node) {
-        Set<SpatialKey> keys = divisionPerformerFactory.create(subNodeKeys(node))
+        Set<SpatialKey> keys = dividerFactory.create(subNodeKeys(node))
             .divide(minSubNodes);
         return newNodes(keys, node);
       }
@@ -241,7 +241,7 @@ public class RTree<T> {
 
     protected NodeFactory nodeFactory = NodeFactory.inMemory();
 
-    protected DivisionPerformerFactory divisionPerformerFactory = UniformDivisionPerformer::new;
+    protected DividerFactory dividerFactory = UniformDivider::new;
 
     protected NodeComparatorFactory nodeComparatorFactory = VolumeIncreaseNodeComparator::new;
 
@@ -258,8 +258,8 @@ public class RTree<T> {
       return this;
     }
 
-    public Builder<T> divisionPerformerFactory(DivisionPerformerFactory divisionPerformerFactory) {
-      this.divisionPerformerFactory = divisionPerformerFactory;
+    public Builder<T> divisionPerformerFactory(DividerFactory dividerFactory) {
+      this.dividerFactory = dividerFactory;
       return this;
     }
 
@@ -273,7 +273,7 @@ public class RTree<T> {
     }
 
     public RTree<T> create() {
-      return new RTree<>(dimensions, minSubNodes, maxSubNodes, nodeFactory, divisionPerformerFactory, nodeComparatorFactory);
+      return new RTree<>(dimensions, minSubNodes, maxSubNodes, nodeFactory, dividerFactory, nodeComparatorFactory);
     }
 
     private void checkMinMax(int minSubNodes, int maxSubNodes) {

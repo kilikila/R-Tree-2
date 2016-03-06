@@ -3,7 +3,7 @@ package rtree;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import rtree.implementations.DistanceNodeComparator;
-import rtree.implementations.UniformDivisionPerformer;
+import rtree.implementations.UniformDivider;
 import rtree.implementations.VolumeIncreaseNodeComparator;
 
 import java.util.List;
@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 public class Benchmark {
 
-  private static final int DATA_SIZE = 100000;
+  private static final int DATA_SIZE = 30000;
 
   private final Map<SpatialKey, Double> data;
 
@@ -28,20 +28,16 @@ public class Benchmark {
 
   public static void main(String[] args) {
     RTree.Builder<Object> builder1 = RTree.builder()
-        .divisionPerformerFactory(UniformDivisionPerformer::new)
+        .divisionPerformerFactory(UniformDivider::new)
         .nodeComparatorFactory(VolumeIncreaseNodeComparator::new)
-        .setMinMax(4, 10);
+        .setMinMax(80, 200);
     RTree.Builder<Object> builder2 = RTree.builder()
-        .divisionPerformerFactory(UniformDivisionPerformer::new)
-        .nodeComparatorFactory(DistanceNodeComparator::new)
-        .setMinMax(40, 100);
-    RTree.Builder<Object> builder3 = RTree.builder()
-        .divisionPerformerFactory(UniformDivisionPerformer::new)
+        .divisionPerformerFactory(UniformDivider::new)
         .nodeComparatorFactory(VolumeIncreaseNodeComparator::new)
-        .setMinMax(400, 1000);
-    new Benchmark(new BenchmarkSetup("VI - 4, 10", builder1),
-        new BenchmarkSetup("D - 40, 100", builder2),
-        new BenchmarkSetup("VI - 400, 1000", builder3)).run();
+        .setMinMax(80, 200);
+    new Benchmark(
+        new BenchmarkSetup("1", builder1),
+        new BenchmarkSetup("2", builder2)).run();
   }
 
   public Benchmark(BenchmarkSetup... setups) {
@@ -58,10 +54,8 @@ public class Benchmark {
   }
 
   private void run() {
-    for (int i = 0; i < 3; i++) {
-      rawSearch();
-      setups.stream().forEach(this::testAndLog);
-    }
+    rawSearch();
+    setups.stream().forEach(this::testAndLog);
   }
 
   private void rawSearch() {
@@ -79,6 +73,7 @@ public class Benchmark {
     System.out.println("Testing " + setup.setupTitle);
     RTree<Double> tree = constructTree(setup.builder);
     testInsert(tree);
+    new VisualizableRTree<Double>(tree).visualize();
     testSearch(tree);
   }
 

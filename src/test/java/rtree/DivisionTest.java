@@ -5,12 +5,14 @@ import org.assertj.core.data.Percentage;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runners.Parameterized;
-import rtree.factories.DivisionPerformerFactory;
-import rtree.implementations.UniformDivisionPerformer;
+import rtree.factories.DividerFactory;
+import rtree.implementations.UniformDivider;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -22,9 +24,9 @@ public class DivisionTest extends DimensionalTest {
 
   private TreeNode nodeToSplit;
 
-  private final DivisionPerformerFactory performerFactory;
+  private final DividerFactory performerFactory;
 
-  public DivisionTest(Integer dimensions, DivisionPerformerFactory performerFactory) {
+  public DivisionTest(Integer dimensions, DividerFactory performerFactory) {
     super(dimensions);
     this.performerFactory = performerFactory;
   }
@@ -70,11 +72,15 @@ public class DivisionTest extends DimensionalTest {
     return SpatialKeyTest.randomBox(nodeToSplit.spatialKey(), 1.0);
   }
 
-  @Parameterized.Parameters(name = "{0}D")
+  @Parameterized.Parameters(name = "{0}D - {1}")
   public static Set<Object[]> factories() {
-    DivisionPerformerFactory factory1 = UniformDivisionPerformer::new;
-    return DimensionalTest.dimensions().stream()
-        .map(dim -> new Object[] {dim, factory1})
+    HashSet<DividerFactory> factories = Sets.newHashSet(UniformDivider::new);
+    return factories.stream()
+        .flatMap(DivisionTest::withDimensions)
         .collect(Collectors.toSet());
+  }
+
+  private static Stream<Object[]> withDimensions(DividerFactory factory) {
+    return DimensionalTest.dimensions().stream().map(dim -> new Object[] {dim, factory});
   }
 }
