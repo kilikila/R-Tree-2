@@ -37,12 +37,12 @@ public class UniformDivisionPerformer implements DivisionPerformer {
     if (isInteger(actualSplits) || isInteger(splitsPerDim)) {
       return (int) Math.round(actualSplits);
     } else {
-      if (penaltySplits >= 0) {
-        penaltySplits -= actualSplits - (int) actualSplits;
-        return (int) actualSplits;
-      } else {
+      if (penaltySplits < 0 || actualSplits < 1) {
         penaltySplits += actualSplits - (int) actualSplits;
         return (int) actualSplits + 1;
+      } else {
+        penaltySplits -= actualSplits - (int) actualSplits;
+        return (int) actualSplits;
       }
     }
   }

@@ -14,9 +14,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class DivisionTest extends DimensionalTest {
 
-  private final int minSubNodes = 4;
+  private final int minSubNodes = 40;
 
-  private final int maxSubNodes = 10;
+  private final int maxSubNodes = 100;
 
   private TreeNode nodeToSplit;
 

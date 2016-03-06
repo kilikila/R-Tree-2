@@ -124,6 +124,7 @@ public class RTree<T> {
     }
 
     private Set<TreeNode> newNodes(Set<SpatialKey> keys, TreeNode node) {
+      Preconditions.checkArgument(keys.size() != 0, "Error - split to zero new nodes");
       Set<TreeNode> newNodes = keys.stream()
           .map(nodeFactory::treeNode)
           .collect(Collectors.toSet());

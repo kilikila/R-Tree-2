@@ -23,10 +23,10 @@ public class SpatialKeyTest extends DimensionalTest {
 
   @Test
   public void testUnion() {
-    SpatialKey cube1 = cube(2, 4);
-    SpatialKey cube2 = cube(0, 2);
-    SpatialKey cube3 = cube(-2, 0);
-    SpatialKey cube4 = cube(-4, -2);
+    SpatialKey cube1 = cube(-4, -2);
+    SpatialKey cube2 = cube(-2, 0);
+    SpatialKey cube3 = cube(0, 2);
+    SpatialKey cube4 = cube(2, 4);
 
     SpatialKey unionAll = SpatialKey.union(Lists.newArrayList(cube1, cube2, cube3, cube4));
     assertThat(unionAll).isEqualTo(zeroCentredCube(8, dimensions));

@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import rtree.factories.NodeComparatorFactory;
+import rtree.implementations.DistanceNodeComparator;
 import rtree.implementations.VolumeIncreaseNodeComparator;
 
 import java.util.Comparator;
@@ -78,6 +79,6 @@ public class NodeComparatorTest {
 
   @Parameterized.Parameters
   public static Set<NodeComparatorFactory> comparatorFactories() {
-    return Sets.newHashSet(VolumeIncreaseNodeComparator::new);
+    return Sets.newHashSet(VolumeIncreaseNodeComparator::new, DistanceNodeComparator::new);
   }
 }

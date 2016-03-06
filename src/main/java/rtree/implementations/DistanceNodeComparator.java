@@ -2,6 +2,7 @@ package rtree.implementations;
 
 import rtree.Node;
 import rtree.SpatialKey;
+import rtree.factories.NodeComparatorFactory;
 
 import java.util.Comparator;
 import java.util.List;
@@ -12,8 +13,8 @@ public class DistanceNodeComparator implements Comparator<Node> {
 
   private final List<Double> center;
 
-  public DistanceNodeComparator(List<Double> center) {
-    this.center = center;
+  public DistanceNodeComparator(Node nodeToInsert) {
+    this.center = center(nodeToInsert);
   }
 
   @Override
@@ -28,8 +29,8 @@ public class DistanceNodeComparator implements Comparator<Node> {
         .sum());
   }
 
-  private List<Double> center(Node nodeToInsert) {
-    SpatialKey key = nodeToInsert.spatialKey();
+  private List<Double> center(Node node) {
+    SpatialKey key = node.spatialKey();
     return key.bounds()
         .map(this::boundCenter)
         .collect(Collectors.toList());
