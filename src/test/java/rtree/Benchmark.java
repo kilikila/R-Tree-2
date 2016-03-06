@@ -2,6 +2,7 @@ package rtree;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
+import rtree.implementations.DistanceNodeComparator;
 import rtree.implementations.UniformDivisionPerformer;
 import rtree.implementations.VolumeIncreaseNodeComparator;
 
@@ -26,7 +27,21 @@ public class Benchmark {
       .create();
 
   public static void main(String[] args) {
-    new Benchmark(new BenchmarkSetup(""), new BenchmarkSetup("")).run();
+    RTree.Builder<Object> builder1 = RTree.builder()
+        .divisionPerformerFactory(UniformDivisionPerformer::new)
+        .nodeComparatorFactory(VolumeIncreaseNodeComparator::new)
+        .setMinMax(4, 10);
+    RTree.Builder<Object> builder2 = RTree.builder()
+        .divisionPerformerFactory(UniformDivisionPerformer::new)
+        .nodeComparatorFactory(DistanceNodeComparator::new)
+        .setMinMax(40, 100);
+    RTree.Builder<Object> builder3 = RTree.builder()
+        .divisionPerformerFactory(UniformDivisionPerformer::new)
+        .nodeComparatorFactory(VolumeIncreaseNodeComparator::new)
+        .setMinMax(400, 1000);
+    new Benchmark(new BenchmarkSetup("VI - 4, 10", builder1),
+        new BenchmarkSetup("D - 40, 100", builder2),
+        new BenchmarkSetup("VI - 400, 1000", builder3)).run();
   }
 
   public Benchmark(BenchmarkSetup... setups) {
@@ -35,11 +50,9 @@ public class Benchmark {
     data = RTreeTest.generateSyntheticData(SpatialKey::volume, DATA_SIZE, boundingBox);
   }
 
-  private RTree<Double> constructTree() {
-    return RTree.builder()
+  private RTree<Double> constructTree(RTree.Builder<?> builder) {
+    return builder
         .dimensions(dimensions)
-        .divisionPerformerFactory(UniformDivisionPerformer::new)
-        .nodeComparatorFactory(VolumeIncreaseNodeComparator::new)
         .dataType(Double.class)
         .create();
   }
@@ -47,8 +60,7 @@ public class Benchmark {
   private void run() {
     for (int i = 0; i < 3; i++) {
       rawSearch();
-      setups.stream().forEach((setup) ->
-          testAndLog(setup.setupTitle, constructTree()));
+      setups.stream().forEach(this::testAndLog);
     }
   }
 
@@ -63,8 +75,9 @@ public class Benchmark {
     System.out.println("Search performed. " + result.size() + " items found. Elapsed time: " + stopwatch);
   }
 
-  private void testAndLog(String splitterName, RTree<Double> tree) {
-    System.out.println("Testing " + splitterName);
+  private void testAndLog(BenchmarkSetup setup) {
+    System.out.println("Testing " + setup.setupTitle);
+    RTree<Double> tree = constructTree(setup.builder);
     testInsert(tree);
     testSearch(tree);
   }
@@ -85,8 +98,11 @@ public class Benchmark {
 
     private final String setupTitle;
 
-    private BenchmarkSetup(String setupTitle) {
+    private final RTree.Builder<?> builder;
+
+    private BenchmarkSetup(String setupTitle, RTree.Builder builder) {
       this.setupTitle = setupTitle;
+      this.builder = builder;
     }
   }
 }

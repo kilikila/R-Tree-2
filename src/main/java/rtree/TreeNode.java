@@ -12,7 +12,7 @@ public interface TreeNode extends Node {
 
   void addSubNode(Node subNode);
 
-  void removeSub(TreeNode subNode);
+  void removeSub(Node subNode);
 
   class InMemory extends Node.InMemory implements TreeNode {
 
@@ -38,7 +38,7 @@ public interface TreeNode extends Node {
     }
 
     @Override
-    public void removeSub(TreeNode subNode) {
+    public void removeSub(Node subNode) {
       subNodes.remove(subNode);
     }
   }

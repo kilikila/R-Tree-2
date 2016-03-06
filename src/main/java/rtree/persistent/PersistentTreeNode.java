@@ -39,7 +39,7 @@ public class PersistentTreeNode extends PersistentNode implements TreeNode {
   }
 
   @Override
-  public void removeSub(TreeNode subNode) {
+  public void removeSub(Node subNode) {
     if (subNode instanceof PersistentNode) {
       PersistentNode persistentNode = (PersistentNode) subNode;
       page().<Set<Object>>modifyByHeader(HEADER_SUB_NODES, subNodes -> subNodes.remove(persistentNode.id));

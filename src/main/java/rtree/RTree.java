@@ -103,8 +103,8 @@ public class RTree<T> {
 
     private Set<TreeNode> castSubsToTreeNodes(TreeNode node) {
       return node.subNodes()
-                .map(subNode -> (TreeNode) subNode)
-                .collect(Collectors.toSet());
+          .map(subNode -> (TreeNode) subNode)
+          .collect(Collectors.toSet());
     }
 
     private void replaceWithNodes(TreeNode node, TreeNode subNode, Set<TreeNode> newNodes) {
@@ -113,8 +113,7 @@ public class RTree<T> {
     }
 
     private Optional<Set<TreeNode>> splitIfNecessaryAndUpdateKey(TreeNode node) {
-      Optional<Set<TreeNode>> split = new NodeSplitter().split(node)
-          .map(keys -> newNodes(keys, node));
+      Optional<Set<TreeNode>> split = new NodeSplitter().split(node);
       if (split.isPresent()) {
         split.get().forEach(this::update);
       } else {
@@ -123,28 +122,11 @@ public class RTree<T> {
       return split;
     }
 
-    private Set<TreeNode> newNodes(Set<SpatialKey> keys, TreeNode node) {
-      Preconditions.checkArgument(keys.size() != 0, "Error - split to zero new nodes");
-      Set<TreeNode> newNodes = keys.stream()
-          .map(nodeFactory::treeNode)
-          .collect(Collectors.toSet());
-      node.subNodes().forEach(subNode -> chooseAndAdd(newNodes, subNode));
-      return nonEmpty(newNodes);
-    }
-
-    private Set<TreeNode> nonEmpty(Set<TreeNode> newNodes) {
-      return newNodes.stream().filter(newNode -> newNode.numOfSubs() > 0).collect(Collectors.toSet());
-    }
-
-    private void chooseAndAdd(Set<TreeNode> nodes, Node subNode) {
-      chooseNode(nodes, subNode).addSubNode(subNode);
-    }
-
     private TreeNode chooseNode(Set<TreeNode> nodes, Node nodeToInsert) {
       Comparator<Node> nodeComparator = nodeComparatorFactory.supplyComparator(nodeToInsert);
       Node chosenSubNode = nodes.stream()
           .min(nodeComparator)
-          .orElseThrow(() -> new IllegalStateException("Cannot choose sub node"));
+          .orElseThrow(() -> new IllegalStateException("No nodes present"));
       return (TreeNode) chosenSubNode;
     }
 
@@ -164,6 +146,41 @@ public class RTree<T> {
 
     private boolean subNodesAreLeaves(TreeNode node) {
       return node.subNodes().iterator().next() instanceof LeafNode;
+    }
+
+    private class NodeSplitter {
+
+      public Optional<Set<TreeNode>> split(TreeNode node) {
+        return Optional.ofNullable(isDividable(node) ? divide(node) : null);
+      }
+
+      private boolean isDividable(TreeNode node) {
+        return node.numOfSubs() > maxSubNodes;
+      }
+
+      protected Set<TreeNode> divide(TreeNode node) {
+        Set<SpatialKey> keys = divisionPerformerFactory.create(subNodeKeys(node))
+            .divide(minSubNodes);
+        return newNodes(keys, node);
+      }
+
+      private Set<SpatialKey> subNodeKeys(TreeNode node) {
+        return node.subNodes().map(Node::spatialKey).collect(Collectors.toSet());
+      }
+
+      private Set<TreeNode> newNodes(Set<SpatialKey> keys, TreeNode node) {
+        Preconditions.checkArgument(keys.size() != 0, "Error - split to zero new nodes");
+        Set<TreeNode> newNodes = keys.stream()
+            .map(nodeFactory::treeNode)
+            .collect(Collectors.toSet());
+        node.subNodes().forEach(subNode -> chooseAndAdd(newNodes, subNode));
+        return newNodes.stream().filter(n -> n.numOfSubs() > 0).collect(Collectors.toSet());
+      }
+
+      private void chooseAndAdd(Set<TreeNode> nodes, Node subNode) {
+        chooseNode(nodes, subNode).addSubNode(subNode);
+      }
+
     }
 
   }
@@ -198,25 +215,6 @@ public class RTree<T> {
 
   }
 
-  private class NodeSplitter {
-
-    public Optional<Set<SpatialKey>> split(TreeNode node) {
-      return Optional.ofNullable(isDividable(node) ? divide(subNodeKeys(node)) : null);
-    }
-
-    private Set<SpatialKey> subNodeKeys(TreeNode node) {
-      return node.subNodes().map(Node::spatialKey).collect(Collectors.toSet());
-    }
-
-    protected Set<SpatialKey> divide(Set<SpatialKey> subNodeKeys) {
-      return divisionPerformerFactory.create(subNodeKeys).divide(minSubNodes);
-    }
-
-    private boolean isDividable(TreeNode node) {
-      return node.numOfSubs() > maxSubNodes;
-    }
-
-  }
   public static Builder<Object> builder() {
     return new Builder<>();
   }

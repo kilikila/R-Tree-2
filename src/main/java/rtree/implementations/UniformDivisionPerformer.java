@@ -13,15 +13,16 @@ import java.util.stream.IntStream;
 
 public class UniformDivisionPerformer implements DivisionPerformer {
 
-  private final SpatialKey boundingKey;
+  private final Set<SpatialKey> subKeys;
 
   private double penaltySplits = 0;
 
   public UniformDivisionPerformer(Set<SpatialKey> subKeys) {
-    boundingKey = SpatialKey.union(subKeys);
+    this.subKeys = subKeys;
   }
 
   public Set<SpatialKey> divide(int divisionCount) {
+    SpatialKey boundingKey = SpatialKey.union(subKeys);
     double splitsPerDim = Math.pow(divisionCount, 1.0 / boundingKey.dimensions());
     double averageBoundLength = boundingKey.bounds()
         .mapToDouble(SpatialKey.Bound::length)
@@ -29,22 +30,32 @@ public class UniformDivisionPerformer implements DivisionPerformer {
     List<Set<SpatialKey.Bound>> newBounds = boundingKey.bounds()
         .map(bound -> splitBound(bound, getSplitCount(bound, splitsPerDim, averageBoundLength)))
         .collect(Collectors.toList());
+    if (noSplit(newBounds)) {
+      throw new IllegalStateException("No split performed");
+    }
     return new BoundsCombiner(newBounds).combine();
+  }
+
+  private boolean noSplit(List<Set<SpatialKey.Bound>> newBounds) {
+    return newBounds.stream()
+        .allMatch(bounds -> bounds.size() < 2);
   }
 
   private int getSplitCount(SpatialKey.Bound bound, double splitsPerDim, double averageBoundLength) {
     double actualSplits = splitsPerDim * bound.length() / averageBoundLength;
+    int splitCount;
     if (isInteger(actualSplits) || isInteger(splitsPerDim)) {
-      return (int) Math.round(actualSplits);
+      splitCount = (int) Math.round(actualSplits);
     } else {
-      if (penaltySplits < 0 || actualSplits < 1) {
+      if (penaltySplits < 0) {
         penaltySplits += actualSplits - (int) actualSplits;
-        return (int) actualSplits + 1;
+        splitCount = (int) actualSplits + 1;
       } else {
         penaltySplits -= actualSplits - (int) actualSplits;
-        return (int) actualSplits;
+        splitCount = (int) actualSplits;
       }
     }
+    return splitCount > 1 ? splitCount : 1;
   }
 
   private boolean isInteger(double val) {
@@ -70,6 +81,9 @@ public class UniformDivisionPerformer implements DivisionPerformer {
 
     public Set<SpatialKey> combine() {
       recursivelyAdd(new ArrayList<>());
+      if (combine.size() == 0) {
+        throw new IllegalStateException("Empty split");
+      }
       return combine;
     }
 
