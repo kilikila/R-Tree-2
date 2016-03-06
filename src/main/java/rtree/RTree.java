@@ -1,16 +1,15 @@
 package rtree;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import rtree.factories.DivisionPerformerFactory;
 import rtree.factories.NodeComparatorFactory;
 import rtree.factories.NodeFactory;
 import rtree.implementations.UniformDivisionPerformer;
 import rtree.implementations.VolumeIncreaseNodeComparator;
 
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -107,6 +106,14 @@ public class RTree<T> {
           .collect(Collectors.toSet());
     }
 
+    private TreeNode chooseNode(Set<TreeNode> nodes, Node nodeToInsert) {
+      Comparator<SpatialKey> keyComparator = nodeComparatorFactory.supplyComparator(nodeToInsert.spatialKey());
+      Node chosenSubNode = nodes.stream()
+          .min(Comparator.comparing(Node::spatialKey, keyComparator))
+          .orElseThrow(() -> new IllegalStateException("No nodes present"));
+      return (TreeNode) chosenSubNode;
+    }
+
     private void replaceWithNodes(TreeNode node, TreeNode subNode, Set<TreeNode> newNodes) {
       node.removeSub(subNode);
       newNodes.forEach(node::addSubNode);
@@ -120,14 +127,6 @@ public class RTree<T> {
         update(node);
       }
       return split;
-    }
-
-    private TreeNode chooseNode(Set<TreeNode> nodes, Node nodeToInsert) {
-      Comparator<Node> nodeComparator = nodeComparatorFactory.supplyComparator(nodeToInsert);
-      Node chosenSubNode = nodes.stream()
-          .min(nodeComparator)
-          .orElseThrow(() -> new IllegalStateException("No nodes present"));
-      return (TreeNode) chosenSubNode;
     }
 
     private void makeNewRoot(Set<TreeNode> nodes) {
@@ -170,15 +169,28 @@ public class RTree<T> {
 
       private Set<TreeNode> newNodes(Set<SpatialKey> keys, TreeNode node) {
         Preconditions.checkArgument(keys.size() != 0, "Error - split to zero new nodes");
-        Set<TreeNode> newNodes = keys.stream()
-            .map(nodeFactory::treeNode)
+        Multimap<SpatialKey, Node> keysToNodes = node.subNodes()
+            .collect(ArrayListMultimap::create, (map, sub) -> chooseAndPut(keys, map, sub), Multimap::putAll);
+        return keysToNodes.keySet().stream()
+            .map(key -> getTreeNode(keysToNodes, key))
             .collect(Collectors.toSet());
-        node.subNodes().forEach(subNode -> chooseAndAdd(newNodes, subNode));
-        return newNodes.stream().filter(n -> n.numOfSubs() > 0).collect(Collectors.toSet());
       }
 
-      private void chooseAndAdd(Set<TreeNode> nodes, Node subNode) {
-        chooseNode(nodes, subNode).addSubNode(subNode);
+      private TreeNode getTreeNode(Multimap<SpatialKey, Node> keysToNodes, SpatialKey key) {
+        TreeNode treeNode = nodeFactory.treeNode(key);
+        Collection<Node> nodesForKey = keysToNodes.get(key);
+        Preconditions.checkState(!nodesForKey.isEmpty());
+        nodesForKey.forEach(treeNode::addSubNode);
+        return treeNode;
+      }
+
+      private boolean chooseAndPut(Set<SpatialKey> keys, Multimap<SpatialKey, Node> map, Node sub) {
+        return map.put(chooseKey(keys, sub.spatialKey()), sub);
+      }
+
+      private SpatialKey chooseKey(Set<SpatialKey> keys, SpatialKey spatialKey) {
+        Comparator<SpatialKey> keyComparator = nodeComparatorFactory.supplyComparator(spatialKey);
+        return keys.stream().max(keyComparator).get();
       }
 
     }

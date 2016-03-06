@@ -9,16 +9,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class DistanceNodeComparator implements Comparator<Node> {
+public class DistanceNodeComparator implements Comparator<SpatialKey> {
 
   private final List<Double> center;
 
-  public DistanceNodeComparator(Node nodeToInsert) {
+  public DistanceNodeComparator(SpatialKey nodeToInsert) {
     this.center = center(nodeToInsert);
   }
 
   @Override
-  public int compare(Node o1, Node o2) {
+  public int compare(SpatialKey o1, SpatialKey o2) {
     return Double.compare(distance(center(o1)), distance(center(o2)));
   }
 
@@ -29,8 +29,7 @@ public class DistanceNodeComparator implements Comparator<Node> {
         .sum());
   }
 
-  private List<Double> center(Node node) {
-    SpatialKey key = node.spatialKey();
+  private List<Double> center(SpatialKey key) {
     return key.bounds()
         .map(this::boundCenter)
         .collect(Collectors.toList());

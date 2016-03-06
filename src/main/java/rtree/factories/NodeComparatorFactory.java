@@ -1,11 +1,12 @@
 package rtree.factories;
 
 import rtree.Node;
+import rtree.SpatialKey;
 
 import java.util.Comparator;
 
 public interface NodeComparatorFactory {
 
-  Comparator<Node> supplyComparator(Node nodeToInsert);
+  Comparator<SpatialKey> supplyComparator(SpatialKey nodeToInsert);
 
 }

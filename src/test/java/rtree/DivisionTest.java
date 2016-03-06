@@ -1,8 +1,10 @@
 package rtree;
 
-import org.assertj.core.data.Offset;
+import com.google.common.collect.Sets;
+import org.assertj.core.data.Percentage;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runners.Parameterized;
 import rtree.factories.DivisionPerformerFactory;
 import rtree.implementations.UniformDivisionPerformer;
 
@@ -20,10 +22,11 @@ public class DivisionTest extends DimensionalTest {
 
   private TreeNode nodeToSplit;
 
-  private DivisionPerformerFactory performerFactory = UniformDivisionPerformer::new;
+  private final DivisionPerformerFactory performerFactory;
 
-  public DivisionTest(Integer dimensions) {
+  public DivisionTest(Integer dimensions, DivisionPerformerFactory performerFactory) {
     super(dimensions);
+    this.performerFactory = performerFactory;
   }
 
   @Before
@@ -43,7 +46,7 @@ public class DivisionTest extends DimensionalTest {
     Set<SpatialKey> keys = nodeToSplit.subNodes().map(Node::spatialKey).collect(Collectors.toSet());
     int splitSize = performerFactory.create(keys)
         .divide(minSubNodes).size();
-    assertThat(splitSize).isCloseTo(minSubNodes, Offset.offset(1));
+    assertThat(splitSize).isCloseTo(minSubNodes, Percentage.withPercentage(20.0));
   }
 
   private void performSplitAndTest(TreeNode nodeToSplit) {
@@ -65,5 +68,13 @@ public class DivisionTest extends DimensionalTest {
 
   private SpatialKey randomKey() {
     return SpatialKeyTest.randomBox(nodeToSplit.spatialKey(), 1.0);
+  }
+
+  @Parameterized.Parameters(name = "{0}D")
+  public static Set<Object[]> factories() {
+    DivisionPerformerFactory factory1 = UniformDivisionPerformer::new;
+    return DimensionalTest.dimensions().stream()
+        .map(dim -> new Object[] {dim, factory1})
+        .collect(Collectors.toSet());
   }
 }

@@ -13,7 +13,7 @@ import java.util.stream.IntStream;
 
 public class UniformDivisionPerformer implements DivisionPerformer {
 
-  private final Set<SpatialKey> subKeys;
+  protected final Set<SpatialKey> subKeys;
 
   private double penaltySplits = 0;
 
@@ -22,23 +22,26 @@ public class UniformDivisionPerformer implements DivisionPerformer {
   }
 
   public Set<SpatialKey> divide(int divisionCount) {
+    List<Set<SpatialKey.Bound>> newBounds = getNewBoundSets(divisionCount);
+    throwIfNoSplit(newBounds);
+    return new BoundsCombiner(newBounds).combine();
+  }
+
+  private void throwIfNoSplit(List<Set<SpatialKey.Bound>> newBounds) {
+    if (newBounds.stream().allMatch(bounds -> bounds.size() < 2)) {
+      throw new IllegalStateException("No split performed");
+    }
+  }
+
+  protected List<Set<SpatialKey.Bound>> getNewBoundSets(int divisionCount) {
     SpatialKey boundingKey = SpatialKey.union(subKeys);
     double splitsPerDim = Math.pow(divisionCount, 1.0 / boundingKey.dimensions());
     double averageBoundLength = boundingKey.bounds()
         .mapToDouble(SpatialKey.Bound::length)
         .average().getAsDouble();
-    List<Set<SpatialKey.Bound>> newBounds = boundingKey.bounds()
+    return boundingKey.bounds()
         .map(bound -> splitBound(bound, getSplitCount(bound, splitsPerDim, averageBoundLength)))
         .collect(Collectors.toList());
-    if (noSplit(newBounds)) {
-      throw new IllegalStateException("No split performed");
-    }
-    return new BoundsCombiner(newBounds).combine();
-  }
-
-  private boolean noSplit(List<Set<SpatialKey.Bound>> newBounds) {
-    return newBounds.stream()
-        .allMatch(bounds -> bounds.size() < 2);
   }
 
   private int getSplitCount(SpatialKey.Bound bound, double splitsPerDim, double averageBoundLength) {
@@ -47,7 +50,7 @@ public class UniformDivisionPerformer implements DivisionPerformer {
     if (isInteger(actualSplits) || isInteger(splitsPerDim)) {
       splitCount = (int) Math.round(actualSplits);
     } else {
-      if (penaltySplits < 0) {
+      if (penaltySplits < 1) {
         penaltySplits += actualSplits - (int) actualSplits;
         splitCount = (int) actualSplits + 1;
       } else {

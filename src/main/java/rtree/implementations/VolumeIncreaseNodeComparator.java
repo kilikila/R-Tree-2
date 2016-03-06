@@ -1,25 +1,26 @@
 package rtree.implementations;
 
 import rtree.Node;
+import rtree.SpatialKey;
 
 import java.util.Comparator;
 
-public class VolumeIncreaseNodeComparator implements Comparator<Node> {
+public class VolumeIncreaseNodeComparator implements Comparator<SpatialKey> {
 
-  private final Node nodeToInsert;
+  private final SpatialKey keyToInsert;
 
-  public VolumeIncreaseNodeComparator(Node nodeToInsert) {
-    this.nodeToInsert = nodeToInsert;
+  public VolumeIncreaseNodeComparator(SpatialKey keyToInsert) {
+    this.keyToInsert = keyToInsert;
   }
 
   @Override
-  public int compare(Node o1, Node o2) {
+  public int compare(SpatialKey o1, SpatialKey o2) {
     return Double.compare(volumeIncrease(o1), volumeIncrease(o2));
   }
 
-  private double volumeIncrease(Node node) {
-    double volume = node.spatialKey().volume();
-    double volumeWithLeaf = node.spatialKey().union(nodeToInsert.spatialKey()).volume();
+  private double volumeIncrease(SpatialKey key) {
+    double volume = key.volume();
+    double volumeWithLeaf = key.union(keyToInsert).volume();
     return volumeWithLeaf - volume;
   }
 }

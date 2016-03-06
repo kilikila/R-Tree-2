@@ -39,11 +39,12 @@ public class NodeComparatorTest {
     node.addSubNode(new TreeNode.InMemory(cube4));
     node.addSubNode(new TreeNode.InMemory(cube5));
     LeafNode<Object> leafNode = new LeafNode.InMemory<>(inside(cube4), new Object());
-    Comparator<Node> nodeComparator = comparatorFactory.supplyComparator(leafNode);
-    Node chosen = node.subNodes()
+    Comparator<SpatialKey> nodeComparator = comparatorFactory.supplyComparator(leafNode.spatialKey());
+    SpatialKey chosen = node.subNodes()
+        .map(Node::spatialKey)
         .min(nodeComparator)
         .get();
-    assertThat(chosen.spatialKey()).isEqualTo(cube4);
+    assertThat(chosen).isEqualTo(cube4);
   }
 
   @Test
@@ -57,11 +58,12 @@ public class NodeComparatorTest {
     node.addSubNode(node1);
     node.addSubNode(node2);
     LeafNode<Object> leafNode = new LeafNode.InMemory<>(SpatialKeyTest.cube(1, 10, 1), new Object());
-    Comparator<Node> nodeComparator = comparatorFactory.supplyComparator(leafNode);
-    Node chosen = node.subNodes()
+    Comparator<SpatialKey> nodeComparator = comparatorFactory.supplyComparator(leafNode.spatialKey());
+    SpatialKey chosen = node.subNodes()
+        .map(Node::spatialKey)
         .min(nodeComparator)
         .get();
-    assertThat(chosen).isEqualTo(node1);
+    assertThat(chosen).isEqualTo(cube1);
   }
 
   private SpatialKey inside(SpatialKey key) {
