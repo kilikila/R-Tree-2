@@ -1,6 +1,5 @@
 package rtree.implementations;
 
-import rtree.Node;
 import rtree.SpatialKey;
 
 import java.util.Comparator;

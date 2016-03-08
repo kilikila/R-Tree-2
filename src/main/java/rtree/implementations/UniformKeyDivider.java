@@ -7,11 +7,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class UniformDivider extends EachBoundDivider {
+public class UniformKeyDivider extends EachBoundKeyDivider {
 
   private double penaltySplits = 0;
 
-  public UniformDivider(Set<SpatialKey> subKeys) {
+  public UniformKeyDivider(Set<SpatialKey> subKeys) {
     super(subKeys);
   }
 

@@ -2,7 +2,7 @@ package rtree;
 
 import java.util.Set;
 
-public interface Divider {
+public interface KeyDivider {
 
   Set<SpatialKey> divide(int numOfSubNodes);
 }

@@ -2,18 +2,18 @@ package rtree.implementations;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import rtree.Divider;
+import rtree.KeyDivider;
 import rtree.SpatialKey;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public abstract class EachBoundDivider implements Divider {
+public abstract class EachBoundKeyDivider implements KeyDivider {
 
   protected final Set<SpatialKey> subKeys;
 
-  public EachBoundDivider(Set<SpatialKey> subKeys) {
+  public EachBoundKeyDivider(Set<SpatialKey> subKeys) {
     this.subKeys = subKeys;
   }
 
