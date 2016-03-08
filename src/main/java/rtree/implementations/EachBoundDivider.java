@@ -9,11 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public abstract class CombiningDivider implements Divider {
+public abstract class EachBoundDivider implements Divider {
 
   protected final Set<SpatialKey> subKeys;
 
-  public CombiningDivider(Set<SpatialKey> subKeys) {
+  public EachBoundDivider(Set<SpatialKey> subKeys) {
     this.subKeys = subKeys;
   }
 

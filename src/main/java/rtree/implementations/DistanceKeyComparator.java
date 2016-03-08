@@ -1,19 +1,17 @@
 package rtree.implementations;
 
-import rtree.Node;
 import rtree.SpatialKey;
-import rtree.factories.NodeComparatorFactory;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class DistanceNodeComparator implements Comparator<SpatialKey> {
+public class DistanceKeyComparator implements Comparator<SpatialKey> {
 
   private final List<Double> center;
 
-  public DistanceNodeComparator(SpatialKey nodeToInsert) {
+  public DistanceKeyComparator(SpatialKey nodeToInsert) {
     this.center = center(nodeToInsert);
   }
 

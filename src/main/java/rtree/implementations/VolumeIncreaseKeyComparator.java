@@ -5,11 +5,11 @@ import rtree.SpatialKey;
 
 import java.util.Comparator;
 
-public class VolumeIncreaseNodeComparator implements Comparator<SpatialKey> {
+public class VolumeIncreaseKeyComparator implements Comparator<SpatialKey> {
 
   private final SpatialKey keyToInsert;
 
-  public VolumeIncreaseNodeComparator(SpatialKey keyToInsert) {
+  public VolumeIncreaseKeyComparator(SpatialKey keyToInsert) {
     this.keyToInsert = keyToInsert;
   }
 

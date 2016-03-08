@@ -1,6 +1,7 @@
 package rtree;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -125,37 +126,22 @@ public class SpatialKey implements Serializable{
     }
   }
 
-  public static Builder builder(int dimensions) {
-    return new Builder(dimensions);
+  public static Builder builder() {
+    return new Builder();
   }
 
   public static class Builder {
 
-    private SpatialKey key;
+    private final List<Bound> bounds = Lists.newArrayList();
 
-    public Builder(int dimensions) {
-      List<Bound> bounds = IntStream.range(0, dimensions)
-          .mapToObj(i -> new Bound(0, 0))
-          .collect(Collectors.toList());
-      key = new SpatialKey(bounds);
-    }
-
-    public Builder setBound(int dimension, double min, double max) {
-      checkDimensionSupported(dimension);
+    public Builder setBound(double min, double max) {
       checkMinMax(min, max);
-      List<Bound> bounds = key.bounds;
-      bounds.remove(dimension);
-      bounds.add(dimension, new Bound(min, max));
-      key = new SpatialKey(bounds);
+      bounds.add(new Bound(min, max));
       return this;
     }
 
-    private void checkDimensionSupported(int dimension) {
-      Preconditions.checkArgument(dimension < key.dimensions(), "Incorrect dimension: %s", dimension);
-    }
-
     public SpatialKey create() {
-      return key;
+      return new SpatialKey(bounds);
     }
 
   }

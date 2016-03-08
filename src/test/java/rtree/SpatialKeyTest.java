@@ -39,9 +39,9 @@ public class SpatialKeyTest extends DimensionalTest {
   }
 
   private SpatialKey cube(double min, double max) {
-    SpatialKey.Builder builder = SpatialKey.builder(dimensions);
+    SpatialKey.Builder builder = SpatialKey.builder();
     IntStream.range(0, dimensions)
-        .forEach(i -> builder.setBound(i, min, max));
+        .forEach(i -> builder.setBound(min, max));
     return builder.create();
   }
 

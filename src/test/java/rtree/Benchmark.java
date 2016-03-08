@@ -2,9 +2,11 @@ package rtree;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
-import rtree.implementations.DistanceNodeComparator;
+import rtree.factories.KeyComparatorFactory;
+import rtree.implementations.CombiningComparator;
+import rtree.implementations.DistanceKeyComparator;
 import rtree.implementations.UniformDivider;
-import rtree.implementations.VolumeIncreaseNodeComparator;
+import rtree.implementations.VolumeIncreaseKeyComparator;
 
 import java.util.List;
 import java.util.Map;
@@ -13,7 +15,7 @@ import java.util.stream.Collectors;
 
 public class Benchmark {
 
-  private static final int DATA_SIZE = 30000;
+  private static final int DATA_SIZE = 3000;
 
   private final Map<SpatialKey, Double> data;
 
@@ -21,23 +23,26 @@ public class Benchmark {
 
   private final List<BenchmarkSetup> setups;
 
-  private final SpatialKey queryKey = SpatialKey.builder(dimensions)
-      .setBound(0, -5, 5)
-      .setBound(1, 0, 0)
+  private final SpatialKey queryKey = SpatialKey.builder()
+      .setBound(-5, 5)
+      .setBound(0, 0)
       .create();
 
   public static void main(String[] args) {
     RTree.Builder<Object> builder1 = RTree.builder()
         .divisionPerformerFactory(UniformDivider::new)
-        .nodeComparatorFactory(VolumeIncreaseNodeComparator::new)
-        .setMinMax(80, 200);
+        .nodeComparatorFactory(VolumeIncreaseKeyComparator::new)
+        .setMinMax(40, 100);
+    KeyComparatorFactory factory = CombiningComparator
+        .factory(VolumeIncreaseKeyComparator::new, DistanceKeyComparator::new);
     RTree.Builder<Object> builder2 = RTree.builder()
         .divisionPerformerFactory(UniformDivider::new)
-        .nodeComparatorFactory(VolumeIncreaseNodeComparator::new)
-        .setMinMax(80, 200);
+        .nodeComparatorFactory(factory)
+        .setMinMax(40, 100);
     new Benchmark(
-        new BenchmarkSetup("1", builder1),
-        new BenchmarkSetup("2", builder2)).run();
+        new BenchmarkSetup("1", builder1, true),
+        new BenchmarkSetup("2", builder2, true)
+    ).run();
   }
 
   public Benchmark(BenchmarkSetup... setups) {
@@ -73,8 +78,8 @@ public class Benchmark {
     System.out.println("Testing " + setup.setupTitle);
     RTree<Double> tree = constructTree(setup.builder);
     testInsert(tree);
-    new VisualizableRTree<Double>(tree).visualize();
     testSearch(tree);
+    if (setup.visualize) new TreeVisualizer(tree.rootNode(), 40, false).visualize();
   }
 
   private void testInsert(RTree<Double> tree) {
@@ -95,9 +100,12 @@ public class Benchmark {
 
     private final RTree.Builder<?> builder;
 
-    private BenchmarkSetup(String setupTitle, RTree.Builder builder) {
+    public final boolean visualize;
+
+    private BenchmarkSetup(String setupTitle, RTree.Builder builder, boolean visualize) {
       this.setupTitle = setupTitle;
       this.builder = builder;
+      this.visualize = visualize;
     }
   }
 }

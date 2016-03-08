@@ -4,9 +4,9 @@ import com.google.common.collect.Sets;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import rtree.factories.NodeComparatorFactory;
-import rtree.implementations.DistanceNodeComparator;
-import rtree.implementations.VolumeIncreaseNodeComparator;
+import rtree.factories.KeyComparatorFactory;
+import rtree.implementations.DistanceKeyComparator;
+import rtree.implementations.VolumeIncreaseKeyComparator;
 
 import java.util.Comparator;
 import java.util.List;
@@ -18,9 +18,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(Parameterized.class)
 public class NodeComparatorTest {
 
-  private final NodeComparatorFactory comparatorFactory;
+  private final KeyComparatorFactory comparatorFactory;
 
-  public NodeComparatorTest(NodeComparatorFactory comparatorFactory) {
+  public NodeComparatorTest(KeyComparatorFactory comparatorFactory) {
     this.comparatorFactory = comparatorFactory;
   }
 
@@ -80,7 +80,7 @@ public class NodeComparatorTest {
   }
 
   @Parameterized.Parameters
-  public static Set<NodeComparatorFactory> comparatorFactories() {
-    return Sets.newHashSet(VolumeIncreaseNodeComparator::new, DistanceNodeComparator::new);
+  public static Set<KeyComparatorFactory> comparatorFactories() {
+    return Sets.newHashSet(VolumeIncreaseKeyComparator::new, DistanceKeyComparator::new);
   }
 }

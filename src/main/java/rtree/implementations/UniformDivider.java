@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class UniformDivider extends CombiningDivider {
+public class UniformDivider extends EachBoundDivider {
 
   private double penaltySplits = 0;
 
@@ -30,22 +30,14 @@ public class UniformDivider extends CombiningDivider {
   private int getSplitCount(SpatialKey.Bound bound, double splitsPerDim, double averageBoundLength) {
     double actualSplits = splitsPerDim * bound.length() / averageBoundLength;
     int splitCount;
-    if (isInteger(actualSplits) || isInteger(splitsPerDim)) {
-      splitCount = (int) Math.round(actualSplits);
+    if (penaltySplits < 0) {
+      penaltySplits += actualSplits - (int) actualSplits;
+      splitCount = (int) actualSplits + 1;
     } else {
-      if (penaltySplits < 0) {
-        penaltySplits += actualSplits - (int) actualSplits;
-        splitCount = (int) actualSplits + 1;
-      } else {
-        penaltySplits -= actualSplits - (int) actualSplits;
-        splitCount = (int) actualSplits;
-      }
+      penaltySplits -= actualSplits - (int) actualSplits;
+      splitCount = (int) actualSplits;
     }
     return splitCount > 1 ? splitCount : 1;
-  }
-
-  private boolean isInteger(double val) {
-    return val == Math.round(val);
   }
 
   private Set<SpatialKey.Bound> splitBound(SpatialKey.Bound bound, int splitCount) {

@@ -2,7 +2,7 @@ package rtree.persistent;
 
 import rtree.RTree;
 import rtree.factories.DividerFactory;
-import rtree.factories.NodeComparatorFactory;
+import rtree.factories.KeyComparatorFactory;
 
 public class PersistentRTree<T> extends RTree<T>{
 
@@ -11,9 +11,9 @@ public class PersistentRTree<T> extends RTree<T>{
                          int maxSubNodes,
                          PageFile pageFile,
                          DividerFactory dividerFactory,
-                         NodeComparatorFactory nodeComparatorFactory) {
+                         KeyComparatorFactory keyComparatorFactory) {
     super(dimensions, minSubNodes, maxSubNodes,
-        new PersistentNodeFactory(pageFile), dividerFactory, nodeComparatorFactory);
+        new PersistentNodeFactory(pageFile), dividerFactory, keyComparatorFactory);
   }
 
   public static <V> PersistentBuilder<V> builder(PageFile pageFile) {
@@ -30,7 +30,7 @@ public class PersistentRTree<T> extends RTree<T>{
 
     @Override
     public PersistentRTree<T> create() {
-      return new PersistentRTree<>(dimensions, minSubNodes, maxSubNodes, pageFile, dividerFactory, nodeComparatorFactory);
+      return new PersistentRTree<>(dimensions, minSubNodes, maxSubNodes, pageFile, dividerFactory, keyComparatorFactory);
     }
   }
 }

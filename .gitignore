@@ -30,3 +30,8 @@
 rtree.iml
 
 *.class
+.idea/libraries/Maven__com_fasterxml_jackson_core_jackson_annotations_2_7_0.xml
+.idea/libraries/Maven__com_fasterxml_jackson_core_jackson_core_2_7_1.xml
+.idea/libraries/Maven__de_erichseifert_vectorgraphics2d_VectorGraphics2D_0_9_3.xml
+.idea/libraries/Maven__com_fasterxml_jackson_core_jackson_databind_2_7_1_1.xml
+.idea/libraries/Maven__org_knowm_xchart_xchart_3_0_2.xml

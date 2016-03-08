@@ -4,10 +4,10 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import rtree.factories.DividerFactory;
-import rtree.factories.NodeComparatorFactory;
+import rtree.factories.KeyComparatorFactory;
 import rtree.factories.NodeFactory;
 import rtree.implementations.UniformDivider;
-import rtree.implementations.VolumeIncreaseNodeComparator;
+import rtree.implementations.VolumeIncreaseKeyComparator;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -25,7 +25,7 @@ public class RTree<T> {
 
   protected final DividerFactory dividerFactory;
 
-  protected final NodeComparatorFactory nodeComparatorFactory;
+  protected final KeyComparatorFactory keyComparatorFactory;
 
   protected TreeNode rootNode = null;
 
@@ -34,13 +34,13 @@ public class RTree<T> {
                int maxSubNodes,
                NodeFactory nodeFactory,
                DividerFactory dividerFactory,
-               NodeComparatorFactory nodeComparatorFactory) {
+               KeyComparatorFactory keyComparatorFactory) {
     this.dimensions = dimensions;
     this.minSubNodes = minSubNodes;
     this.maxSubNodes = maxSubNodes;
     this.nodeFactory = nodeFactory;
     this.dividerFactory = dividerFactory;
-    this.nodeComparatorFactory = nodeComparatorFactory;
+    this.keyComparatorFactory = keyComparatorFactory;
   }
 
   public int dimensions() {
@@ -62,6 +62,10 @@ public class RTree<T> {
 
   public boolean isEmpty() {
     return rootNode == null;
+  }
+
+  TreeNode rootNode() {
+    return rootNode;
   }
 
   private void checkKeyDimensions(final SpatialKey key) {
@@ -107,7 +111,7 @@ public class RTree<T> {
     }
 
     private TreeNode chooseNode(Set<TreeNode> nodes, Node nodeToInsert) {
-      Comparator<SpatialKey> keyComparator = nodeComparatorFactory.supplyComparator(nodeToInsert.spatialKey());
+      Comparator<SpatialKey> keyComparator = keyComparatorFactory.supplyComparator(nodeToInsert.spatialKey());
       Node chosenSubNode = nodes.stream()
           .min(Comparator.comparing(Node::spatialKey, keyComparator))
           .orElseThrow(() -> new IllegalStateException("No nodes present"));
@@ -189,7 +193,7 @@ public class RTree<T> {
       }
 
       private SpatialKey chooseKey(Set<SpatialKey> keys, SpatialKey spatialKey) {
-        Comparator<SpatialKey> keyComparator = nodeComparatorFactory.supplyComparator(spatialKey);
+        Comparator<SpatialKey> keyComparator = keyComparatorFactory.supplyComparator(spatialKey);
         return keys.stream().max(keyComparator).get();
       }
 
@@ -216,7 +220,7 @@ public class RTree<T> {
 
     @SuppressWarnings(value = {"unchecked"})
     private void searchSubNodes(Node node) {
-      if (node instanceof LeafNode.InMemory) {
+      if (node instanceof LeafNode) {
         result.add(((LeafNode<T>) node).data());
       } else {
         ((TreeNode) node).subNodes()
@@ -243,7 +247,7 @@ public class RTree<T> {
 
     protected DividerFactory dividerFactory = UniformDivider::new;
 
-    protected NodeComparatorFactory nodeComparatorFactory = VolumeIncreaseNodeComparator::new;
+    protected KeyComparatorFactory keyComparatorFactory = VolumeIncreaseKeyComparator::new;
 
     public Builder<T> dimensions(int dimensions) {
       Preconditions.checkArgument(dimensions > 0, "Dimensions must be positive, you set %s", dimensions);
@@ -263,8 +267,8 @@ public class RTree<T> {
       return this;
     }
 
-    public Builder<T> nodeComparatorFactory(NodeComparatorFactory nodeComparatorFactory) {
-      this.nodeComparatorFactory = nodeComparatorFactory;
+    public Builder<T> nodeComparatorFactory(KeyComparatorFactory keyComparatorFactory) {
+      this.keyComparatorFactory = keyComparatorFactory;
       return this;
     }
 
@@ -273,7 +277,7 @@ public class RTree<T> {
     }
 
     public RTree<T> create() {
-      return new RTree<>(dimensions, minSubNodes, maxSubNodes, nodeFactory, dividerFactory, nodeComparatorFactory);
+      return new RTree<>(dimensions, minSubNodes, maxSubNodes, nodeFactory, dividerFactory, keyComparatorFactory);
     }
 
     private void checkMinMax(int minSubNodes, int maxSubNodes) {
