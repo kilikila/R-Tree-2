@@ -36,7 +36,7 @@ public class Benchmark {
         .setMinMax(40, 100);
     KeyComparatorFactory factory = CombiningComparator
         .factory(VolumeIncreaseKeyComparator::new);
-    RTree.Builder<Object> builder2 = PersistentRTree.builder(new PageFile("test-page-file.txt", 20000))
+    RTree.Builder<Object> builder2 = PersistentRTree.builder(new PageFile("test-page-file.txt", 4000))
         .divisionPerformerFactory(UniformKeyDivider::new)
         .nodeComparatorFactory(factory)
         .setMinMax(4, 10);

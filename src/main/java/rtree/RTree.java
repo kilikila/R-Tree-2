@@ -3,6 +3,7 @@ package rtree;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 import rtree.factories.KeyDividerFactory;
 import rtree.factories.KeyComparatorFactory;
 import rtree.factories.NodeFactory;
@@ -29,12 +30,12 @@ public class RTree<T> {
 
   protected TreeNode rootNode = null;
 
-  public RTree(int dimensions,
-               int minSubNodes,
-               int maxSubNodes,
-               NodeFactory nodeFactory,
-               KeyDividerFactory keyDividerFactory,
-               KeyComparatorFactory keyComparatorFactory) {
+  protected RTree(int dimensions,
+                  int minSubNodes,
+                  int maxSubNodes,
+                  NodeFactory nodeFactory,
+                  KeyDividerFactory keyDividerFactory,
+                  KeyComparatorFactory keyComparatorFactory) {
     this.dimensions = dimensions;
     this.minSubNodes = minSubNodes;
     this.maxSubNodes = maxSubNodes;
@@ -134,9 +135,8 @@ public class RTree<T> {
     }
 
     private void makeNewRoot(Set<TreeNode> nodes) {
-      rootNode = nodeFactory.treeNode(leafNode.spatialKey());
+      rootNode = nodeFactory.treeNode(rootNode.spatialKey());
       nodes.forEach(rootNode::addSubNode);
-      update(rootNode);
     }
 
     private void update(TreeNode node) {
@@ -239,9 +239,9 @@ public class RTree<T> {
 
     protected int dimensions = 2;
 
-    protected int minSubNodes = 4;
+    protected int minSubNodes = 40;
 
-    protected int maxSubNodes = 10;
+    protected int maxSubNodes = 100;
 
     protected NodeFactory nodeFactory = NodeFactory.inMemory();
 
